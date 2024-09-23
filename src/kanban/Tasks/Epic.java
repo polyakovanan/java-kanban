@@ -27,6 +27,10 @@ public class Epic extends Task{
         subtasks.remove(id);
     }
 
+    public void clearSubtasks(){
+        subtasks.clear();
+    }
+
     public void calcStatus(){
         int subtaskCount = subtasks.keySet().size();
         if(subtaskCount == 0){

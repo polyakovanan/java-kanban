@@ -44,12 +44,22 @@ public class TaskManager {
         switch (type) {
             case EPIC -> {
                 epicStorage.clear();
+                //если очистили все эпики, то все подзадачи тоже осиротели. Очистим в них ссылки на эпики
+                for (Integer id : subtaskStorage.keySet()){
+                    Subtask subtask = (Subtask) subtaskStorage.get(id);
+                    subtask.setEpic(null);
+                }
             }
             case TASK -> {
                 taskStorage.clear();
             }
             case SUBTASK -> {
                 subtaskStorage.clear();
+                //если очистили все подзадачи, то все эпики тоже опустели. Очистим в них ссылки на подзадачи
+                for (Integer id : epicStorage.keySet()){
+                    Epic epic = (Epic) epicStorage.get(id);
+                    epic.clearSubtasks();
+                }
             }
         }
 
