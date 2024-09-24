@@ -10,6 +10,10 @@ import java.util.HashMap;
 public class Epic extends Task{
     private HashMap<Integer, Subtask> subtasks;
 
+    public Epic(String name, String description) {
+        super(name, description);
+        subtasks = new HashMap<>();
+    }
     public Epic(int id, String name, String description) {
         super(id, name, description);
         subtasks = new HashMap<>();
@@ -34,27 +38,42 @@ public class Epic extends Task{
     public void calcStatus(){
         int subtaskCount = subtasks.keySet().size();
         if(subtaskCount == 0){
-            this.setStatus(TaskStatus.NEW);
+            this.status = TaskStatus.NEW;
             return;
         }
 
         int newCount = 0;
         int doneCount = 0;
         for (Integer subId : subtasks.keySet()){
-            if (subtasks.get(subId).getStatus() != TaskStatus.NEW){
+            if (subtasks.get(subId).getStatus() == TaskStatus.NEW){
                 newCount++;
             }
-            if (subtasks.get(subId).getStatus() != TaskStatus.DONE){
+            if (subtasks.get(subId).getStatus() == TaskStatus.DONE){
                 doneCount++;
             }
         }
 
         if(newCount == subtaskCount){
-            this.setStatus(TaskStatus.NEW);
+            this.status = TaskStatus.NEW;
         } else if (doneCount == subtaskCount) {
-            this.setStatus(TaskStatus.DONE);
+            this.status = TaskStatus.DONE;
         } else {
-            this.setStatus(TaskStatus.IN_PROGRESS);
+            this.status = TaskStatus.IN_PROGRESS;
         }
+    }
+
+    @Override
+    public void setStatus(TaskStatus status) {
+        //ничего не делаем, потому что нельзя... У эпика только рассчетный статус
+    }
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", subtasks=" + subtasks.keySet() +
+                '}';
     }
 }

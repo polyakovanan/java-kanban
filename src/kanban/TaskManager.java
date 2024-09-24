@@ -70,15 +70,16 @@ public class TaskManager {
     /*Аналогичная история. Даем фронту создать задачу с указанием типа.
     * Если такой id уже есть, то "СОЗДАТЬ" мы его не можем
     * (с точки зрения бизнес-логики - это уже будет обновление)
-    * поэтому вернем false. Иначе true*/
-    public boolean createTaskByType(Task task, TaskType type){
+    * поэтому вернем id созданной задачи. Иначе -1*/
+    public int createTaskByType(Task task, TaskType type){
         int id = idCounter + 1;
         HashMap<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
                 if (!tasks.containsKey(id)) {
                     Epic epic = (Epic) task;
-                    tasks.put(++idCounter, epic);
+                    epic.setId(++idCounter);
+                    tasks.put(epic.getId(), epic);
                     //для эпика также смотрим список его подзадач и обновляем в них ссылку на эпик
                     //(подразумеваем, что нельзя создать одним запросом и эпик, и его подзадачи)
                     //а еще сюда как будто транзакцию хочется, на случай если что-то пойдет не так в процессе
@@ -86,35 +87,37 @@ public class TaskManager {
 
                     //пересчитываем статус эпика
                     epic.calcStatus();
-                    return true;
+                    return idCounter;
                 }
             }
             case TASK -> {
                 if (!tasks.containsKey(id)) {
-                    tasks.put(++idCounter, task);
-                    return true;
+                    task.setId(++idCounter);
+                    tasks.put(task.getId(), task);
+                    return idCounter;
                 }
             }
             case SUBTASK -> {
                 if (!tasks.containsKey(id)) {
-                    tasks.put(++idCounter, task);
+                    task.setId(++idCounter);
+                    tasks.put(task.getId(), task);
                     //для подзадачи находим ее эпик и добавляем в него ссылку на нее
                     //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
                     Subtask subtask = (Subtask) task;
                     subtask.getEpic().addSubtask(subtask);
                     //пересчитываем статус эпика
                     subtask.getEpic().calcStatus();
-                    return true;
+                    return idCounter;
                 }
             }
         }
 
-        return false;
+        return -1;
     }
 
     /*Если фронт по какой-то причине не может отдать тип задачи
     * определим его сами. Почему бы и нет*/
-    public boolean createTask(Task task){
+    public int createTask(Task task){
         if (task instanceof Epic) {
             return createTaskByType(task, TaskType.EPIC);
         } else if (task instanceof Subtask) {
@@ -158,10 +161,10 @@ public class TaskManager {
                     if (originalSubtask.getEpic().getId() != newSubtask.getEpic().getId()){
                         originalSubtask.getEpic().removeSubtask(originalSubtask.getId());
                         newSubtask.getEpic().addSubtask(newSubtask);
-                        //пересчитываем статус эпика
-                        newSubtask.getEpic().calcStatus();
                     }
 
+                    //пересчитываем статус эпика
+                    newSubtask.getEpic().calcStatus();
                     tasks.put(id, task);
                     return true;
                 }
@@ -197,6 +200,8 @@ public class TaskManager {
                             subtasks.get(subId).setEpic(null);
                         }
                     }
+
+                    epic.calcStatus();
                     tasks.remove(id);
                     return true;
                 }
