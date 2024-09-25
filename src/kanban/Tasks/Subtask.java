@@ -2,33 +2,36 @@ package kanban.Tasks;
 
 public class Subtask extends Task{
 
-    private Epic epic;
+    private int epicId;
     public Subtask(String name, String description, Epic epic) {
         super(name, description);
-        this.epic = epic;
+        this.epicId = epic.getId();
     }
     public Subtask(int id, String name, String description, Epic epic) {
         super(id, name, description);
-        this.epic = epic;
+        this.epicId = epic.getId();
     }
 
-    public Epic getEpic() {
-        return epic;
+    public int getEpicId() {
+        return epicId;
     }
 
-    public void setEpic(Epic epic) {
-        this.epic = epic;
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
     }
 
 
     @Override
     public String toString() {
         return "Subtask{" +
-                "epic=" + (epic != null ? epic.getId() : "null")  +
+                "epicId=" + epicId  +
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
     }
+
+    @Override
+    public TaskType getType() { return TaskType.SUBTASK; }
 }

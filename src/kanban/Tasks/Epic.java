@@ -25,17 +25,20 @@ public class Epic extends Task{
 
     public void addSubtask(Subtask subtask){
         subtasks.put(subtask.getId(), subtask);
+        calcStatus();
     }
 
     public void removeSubtask(int id){
         subtasks.remove(id);
+        calcStatus();
     }
 
     public void clearSubtasks(){
         subtasks.clear();
+        calcStatus();
     }
 
-    public void calcStatus(){
+    private void calcStatus(){
         int subtaskCount = subtasks.keySet().size();
         if(subtaskCount == 0){
             this.status = TaskStatus.NEW;
@@ -44,12 +47,15 @@ public class Epic extends Task{
 
         int newCount = 0;
         int doneCount = 0;
-        for (Integer subId : subtasks.keySet()){
-            if (subtasks.get(subId).getStatus() == TaskStatus.NEW){
+        for (Subtask subtask : subtasks.values()){
+            TaskStatus subtaskStatus = subtask.getStatus();
+            if (subtaskStatus == TaskStatus.NEW){
                 newCount++;
-            }
-            if (subtasks.get(subId).getStatus() == TaskStatus.DONE){
+            } else if (subtaskStatus == TaskStatus.DONE){
                 doneCount++;
+            } else {
+                this.status = TaskStatus.IN_PROGRESS;
+                return;
             }
         }
 
@@ -64,7 +70,7 @@ public class Epic extends Task{
 
     @Override
     public void setStatus(TaskStatus status) {
-        //ничего не делаем, потому что нельзя... У эпика только рассчетный статус
+        throw new UnsupportedOperationException("Невозможно явно установить статус эпика, так как это расчетное значение");
     }
     @Override
     public String toString() {
@@ -76,4 +82,6 @@ public class Epic extends Task{
                 ", subtasks=" + subtasks.keySet() +
                 '}';
     }
+    @Override
+    public TaskType getType() { return TaskType.EPIC; }
 }
