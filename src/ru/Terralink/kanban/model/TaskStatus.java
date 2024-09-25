@@ -1,4 +1,4 @@
-package kanban.Tasks;
+package ru.Terralink.kanban.model;
 
 public enum TaskStatus {
     NEW,

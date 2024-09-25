@@ -1,13 +1,12 @@
-package kanban;
+package ru.Terralink.kanban.service;
 
-import kanban.Tasks.Epic;
-import kanban.Tasks.Subtask;
-import kanban.Tasks.Task;
-import kanban.Tasks.TaskType;
+import ru.Terralink.kanban.model.Epic;
+import ru.Terralink.kanban.model.Subtask;
+import ru.Terralink.kanban.model.Task;
+import ru.Terralink.kanban.model.TaskType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class TaskManager {
@@ -161,13 +160,7 @@ public class TaskManager {
 
     /*Тут тоже можем сами определить тип обновляемой задачи*/
     public boolean updateTaskById(Task task, int id){
-        if (task instanceof Epic) {
-            return updateTaskByIdAndType(task, id, TaskType.EPIC);
-        } else if (task instanceof Subtask) {
-            return updateTaskByIdAndType(task, id, TaskType.SUBTASK);
-        } else {
-            return updateTaskByIdAndType(task, id, TaskType.TASK);
-        }
+        return updateTaskByIdAndType(task, id, task.getType());
     }
 
     /*И в очередной раз, следуя бизнес-логике, вернем ошибку, если удалять нечего.
@@ -222,12 +215,13 @@ public class TaskManager {
     }
 
     /*Если есть такой эпик - отдаем его список подзадач*/
-    public Map<Integer, Subtask> getSubtasksByEpic(int id) {
+    public ArrayList<Subtask> getSubtasksByEpic(int id) {
         HashMap<Integer, Task> tasks = taskStorage.get(TaskType.EPIC);
         if (tasks.containsKey(id)) {
-            return ((Epic) tasks.get(id)).getSubtasks();
+            return new ArrayList<>(((Epic)tasks.get(id)).getSubtasks().values());
         }
-        return null;
+
+        return new ArrayList<>();
     }
 
     private void updateSubtasksByEpic(Epic originalEpic, Epic newEpic){

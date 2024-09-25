@@ -1,4 +1,4 @@
-package kanban.Tasks;
+package ru.Terralink.kanban.model;
 
 import java.util.HashMap;
 
@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 
 public class Epic extends Task{
-    private HashMap<Integer, Subtask> subtasks;
+    private final HashMap<Integer, Subtask> subtasks;
 
     public Epic(String name, String description) {
         super(name, description);

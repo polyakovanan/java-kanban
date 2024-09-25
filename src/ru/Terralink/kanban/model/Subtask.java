@@ -1,4 +1,4 @@
-package kanban.Tasks;
+package ru.Terralink.kanban.model;
 
 public class Subtask extends Task{
 

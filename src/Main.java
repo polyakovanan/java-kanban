@@ -1,5 +1,5 @@
-import kanban.TaskManager;
-import kanban.Tasks.*;
+import ru.Terralink.kanban.model.*;
+import ru.Terralink.kanban.service.TaskManager;
 
 public class Main {
 
