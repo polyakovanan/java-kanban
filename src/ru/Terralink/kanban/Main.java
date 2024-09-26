@@ -1,5 +1,7 @@
-import ru.Terralink.kanban.model.*;
-import ru.Terralink.kanban.service.TaskManager;
+package ru.terralink.kanban;
+
+import ru.terralink.kanban.model.*;
+import ru.terralink.kanban.service.TaskManager;
 
 public class Main {
 

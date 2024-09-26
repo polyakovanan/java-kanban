@@ -1,9 +1,9 @@
-package ru.Terralink.kanban.service;
+package ru.terralink.kanban.service;
 
-import ru.Terralink.kanban.model.Epic;
-import ru.Terralink.kanban.model.Subtask;
-import ru.Terralink.kanban.model.Task;
-import ru.Terralink.kanban.model.TaskType;
+import ru.terralink.kanban.model.Epic;
+import ru.terralink.kanban.model.Subtask;
+import ru.terralink.kanban.model.Task;
+import ru.terralink.kanban.model.TaskType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,38 +70,31 @@ public class TaskManager {
     * (с точки зрения бизнес-логики - это уже будет обновление)
     * поэтому вернем id созданной задачи. Иначе -1*/
     public int createTaskByType(Task task, TaskType type){
-        int id = idCounter + 1;
         HashMap<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
-                if (!tasks.containsKey(id)) {
-                    //Доверимся фронту и посчитаем, что эпик создается перед созданием подзадач
-                    //и следовательно список его подзадач пуст (ничего каскадно создавать не надо)
-                    Epic epic = (Epic) task;
-                    epic.setId(++idCounter);
-                    tasks.put(epic.getId(), epic);
+                //Доверимся фронту и посчитаем, что эпик создается перед созданием подзадач
+                //и следовательно список его подзадач пуст (ничего каскадно создавать не надо)
+                Epic epic = (Epic) task;
+                epic.setId(++idCounter);
+                tasks.put(epic.getId(), epic);
 
-                    return idCounter;
-                }
+                return idCounter;
             }
             case TASK -> {
-                if (!tasks.containsKey(id)) {
-                    task.setId(++idCounter);
-                    tasks.put(task.getId(), task);
-                    return idCounter;
-                }
+                task.setId(++idCounter);
+                tasks.put(task.getId(), task);
+                return idCounter;
             }
             case SUBTASK -> {
-                if (!tasks.containsKey(id)) {
-                    task.setId(++idCounter);
-                    tasks.put(task.getId(), task);
-                    //для подзадачи находим ее эпик и добавляем в него ссылку на нее
-                    //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
-                    Subtask subtask = (Subtask) task;
-                    Epic targetEpic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
-                    targetEpic.addSubtask(subtask);
-                    return idCounter;
-                }
+                task.setId(++idCounter);
+                tasks.put(task.getId(), task);
+                //для подзадачи находим ее эпик и добавляем в него ссылку на нее
+                //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
+                Subtask subtask = (Subtask) task;
+                Epic targetEpic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
+                targetEpic.addSubtask(subtask);
+                return idCounter;
             }
         }
 
@@ -122,11 +115,9 @@ public class TaskManager {
         switch (type) {
             case EPIC -> {
                 if (tasks.containsKey(id)) {
-                    //проверяем, сменился ли у эпика список подзадач
-                    Epic originalEpic = (Epic) tasks.get(id);
-                    Epic newEpic = (Epic) task;
-                    updateSubtasksByEpic(originalEpic, newEpic);
-                    tasks.put(id, newEpic);
+                    final Epic originalEpic = (Epic) tasks.get(id);
+                    originalEpic.setName(task.getName());
+                    originalEpic.setDescription(task.getDescription());
                     return true;
                 }
             }
@@ -171,16 +162,13 @@ public class TaskManager {
             case EPIC -> {
                 if (tasks.containsKey(id)) {
                     //если удаляем эпик, то надо удалить все его подзадачи
-                    Epic epic = (Epic) tasks.get(id);
+                    final Epic epic = (Epic) tasks.remove(id);
                     HashMap<Integer, Subtask> epicSubtasks = epic.getSubtasks();
-                    if (epicSubtasks != null) {
-                        HashMap<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
-                        for (Integer subId : epicSubtasks.keySet()){
-                            subtasks.remove(subId);
-                        }
+                    HashMap<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
+                    for (Integer subId : epicSubtasks.keySet()){
+                        subtasks.remove(subId);
                     }
 
-                    tasks.remove(id);
                     return true;
                 }
             }
@@ -193,10 +181,9 @@ public class TaskManager {
             case SUBTASK -> {
                 if (tasks.containsKey(id)) {
                     //если подзадачу удалили, надо убрать ссылку на нее из ее эпика
-                    Subtask subtask = (Subtask) tasks.get(id);
+                    final Subtask subtask = (Subtask) tasks.remove(id);
                     Epic epic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                     epic.removeSubtask(id);
-                    tasks.remove(id);
                     return true;
                 }
             }
@@ -222,25 +209,5 @@ public class TaskManager {
         }
 
         return new ArrayList<>();
-    }
-
-    private void updateSubtasksByEpic(Epic originalEpic, Epic newEpic){
-        Set<Integer> originalSubtasks = originalEpic.getSubtasks().keySet();
-        Set<Integer> newSubtasks = newEpic.getSubtasks().keySet();
-
-        //удаляем у все подзадачи, которых больше нет в списке у эпика
-        for(Integer originalId : originalSubtasks){
-            if (!newSubtasks.contains(originalId) && taskStorage.get(TaskType.SUBTASK).get(originalId) != null){
-                taskStorage.get(TaskType.SUBTASK).remove(originalId);
-            }
-        }
-
-        //добавляем у всех подзадач, которых теперь появились в списке у эпика ссылку на эпик
-        for(Integer newId : newSubtasks){
-            if (!originalSubtasks.contains(newId) && taskStorage.get(TaskType.SUBTASK).get(newId) != null){
-                Subtask subtask = (Subtask) taskStorage.get(TaskType.SUBTASK).get(newId);
-                subtask.setEpicId(newEpic.getId());
-            }
-        }
     }
 }

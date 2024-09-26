@@ -1,4 +1,4 @@
-package ru.Terralink.kanban.model;
+package ru.terralink.kanban.model;
 
 public enum TaskType {
     TASK,
