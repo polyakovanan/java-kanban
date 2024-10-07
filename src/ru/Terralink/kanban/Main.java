@@ -1,12 +1,13 @@
 package ru.terralink.kanban;
 
 import ru.terralink.kanban.model.*;
+import ru.terralink.kanban.service.Managers;
 import ru.terralink.kanban.service.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         //Создайте две задачи, а также эпик с двумя подзадачами и эпик с одной подзадачей.
         Task firstTask = new Task("Заехать в больницу", "Лучше ехать по Луначарского, там пробка меньше");
         taskManager.createTaskByType(firstTask, TaskType.TASK);
@@ -46,6 +47,12 @@ public class Main {
         taskManager.updateTaskById(thirdSubtask, thirdSubtask.getId());
         printAll(taskManager);
 
+        taskManager.getTaskById(4);
+        taskManager.getTaskById(1);
+        taskManager.getTaskById(2);
+        taskManager.getTaskById(4);
+        printAll(taskManager);
+
         //И, наконец, попробуйте удалить одну из задач и один из эпиков.
         taskManager.deleteTaskById(secondTask.getId());
         taskManager.deleteTaskByIdAndType(secondEpic.getId(), TaskType.EPIC);
@@ -55,11 +62,17 @@ public class Main {
     }
 
     private static void printAll(TaskManager taskManager){
+        System.out.println("Эпики");
         System.out.println(taskManager.getTasksByType(TaskType.EPIC));
         System.out.println();
+        System.out.println("Таски");
         System.out.println(taskManager.getTasksByType(TaskType.TASK));
         System.out.println();
+        System.out.println("Сабтаски");
         System.out.println(taskManager.getTasksByType(TaskType.SUBTASK));
+        System.out.println();
+        System.out.println("История");
+        System.out.println(taskManager.getHistory());
         System.out.println();
     }
 }
