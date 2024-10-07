@@ -97,12 +97,16 @@ public class InMemoryTaskManager implements TaskManager {
                 return idCounter;
             }
             case SUBTASK -> {
-                task.setId(++idCounter);
-                tasks.put(task.getId(), task);
                 //для подзадачи находим ее эпик и добавляем в него ссылку на нее
                 //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
                 Subtask subtask = (Subtask) task;
                 Epic targetEpic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
+                if (targetEpic == null) {
+                    return -1;
+                }
+
+                task.setId(++idCounter);
+                tasks.put(task.getId(), task);
                 targetEpic.addSubtask(subtask);
                 return idCounter;
             }
