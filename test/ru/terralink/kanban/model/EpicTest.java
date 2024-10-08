@@ -1,28 +1,9 @@
-package model;
+package ru.terralink.kanban.model;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.terralink.kanban.model.Epic;
-import ru.terralink.kanban.model.Subtask;
-import ru.terralink.kanban.model.Task;
-import ru.terralink.kanban.model.TaskStatus;
 
-class TaskTest {
-
-    @Test
-    void TasksWithSameIdEqual() {
-        Task task1 = new Task(1, "Задача 1", "Задача 1");
-        Task task2 = new Task(1, "Задача 2", "Задача 2");
-        Assertions.assertEquals(task1, task2, "Задачи не равны");
-    }
-
-    @Test
-    void SubtasksWithSameIdEqual() {
-        Epic epic = new Epic(1,"Эпик", "Эпик");
-        Subtask Subtask1 = new Subtask(2, "Подзадача 1", "Подзадача 1", epic);
-        Subtask Subtask2 = new Subtask(2, "Подзадача 2", "Подзадача 2", epic);
-        Assertions.assertEquals(Subtask1, Subtask2, "Подзадачи не равны");
-    }
+public class EpicTest {
 
     @Test
     void EpicsWithSameIdEqual() {

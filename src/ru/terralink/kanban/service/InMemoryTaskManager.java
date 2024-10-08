@@ -5,14 +5,13 @@ import ru.terralink.kanban.model.Subtask;
 import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
     private int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
-    private final HashMap<TaskType, HashMap<Integer, Task>> taskStorage;
+    private final Map<TaskType, Map<Integer, Task>> taskStorage;
     private final HistoryManager historyManager;
     public InMemoryTaskManager(){
         taskStorage = new HashMap<>();
@@ -23,7 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Вернем список с целевым типом задачи
     @Override
-    public ArrayList<Task> getTasksByType(TaskType type){
+    public List<Task> getTasksByType(TaskType type){
         return new ArrayList<>(taskStorage.get(type).values());
     }
 
@@ -33,7 +32,7 @@ public class InMemoryTaskManager implements TaskManager {
     * ошибок в новой потенциальной логике.*/
     @Override
     public boolean removeTasksByType(TaskType type){
-        HashMap<Integer, Task> tasks = taskStorage.get(type);
+        Map<Integer, Task> tasks = taskStorage.get(type);
         if (type == TaskType.EPIC) {
             //Если очистили все эпики, то все подзадачи тоже удалились.
             taskStorage.get(TaskType.SUBTASK).clear();
@@ -80,7 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
     * поэтому вернем id созданной задачи. Иначе -1*/
     @Override
     public int createTaskByType(Task task, TaskType type){
-        HashMap<Integer, Task> tasks = taskStorage.get(type);
+        Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
                 //Доверимся фронту и посчитаем, что эпик создается перед созданием подзадач
@@ -127,7 +126,7 @@ public class InMemoryTaskManager implements TaskManager {
     * с таким id нет*/
     @Override
     public boolean updateTaskByIdAndType(Task task, int id, TaskType type){
-        HashMap<Integer, Task> tasks = taskStorage.get(type);
+        Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
                 if (tasks.containsKey(id)) {
@@ -175,14 +174,14 @@ public class InMemoryTaskManager implements TaskManager {
     * Хоть этот процесс никак не вредит технической составляющей процесса*/
     @Override
     public boolean deleteTaskByIdAndType(int id, TaskType type){
-        HashMap<Integer, Task> tasks = taskStorage.get(type);
+        Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
                 if (tasks.containsKey(id)) {
                     //если удаляем эпик, то надо удалить все его подзадачи
                     final Epic epic = (Epic) tasks.remove(id);
-                    HashMap<Integer, Subtask> epicSubtasks = epic.getSubtasks();
-                    HashMap<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
+                    Map<Integer, Subtask> epicSubtasks = epic.getSubtasks();
+                    Map<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
                     for (Integer subId : epicSubtasks.keySet()){
                         subtasks.remove(subId);
                     }
@@ -222,8 +221,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*Если есть такой эпик - отдаем его список подзадач*/
     @Override
-    public ArrayList<Subtask> getSubtasksByEpic(int id) {
-        HashMap<Integer, Task> tasks = taskStorage.get(TaskType.EPIC);
+    public List<Subtask> getSubtasksByEpic(int id) {
+        Map<Integer, Task> tasks = taskStorage.get(TaskType.EPIC);
         if (tasks.containsKey(id)) {
             return new ArrayList<>(((Epic)tasks.get(id)).getSubtasks().values());
         }

@@ -1,6 +1,7 @@
 package ru.terralink.kanban.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /* Добавляем эпику ссылку на список его подзадач. Сохраним их в хэш-мапе,
 * аналагично тому, как все задачи хранит TaskManager для того, чтобы унифицировать то,
@@ -8,7 +9,7 @@ import java.util.HashMap;
  */
 
 public class Epic extends Task{
-    private final HashMap<Integer, Subtask> subtasks;
+    private final Map<Integer, Subtask> subtasks;
 
     public Epic(String name, String description) {
         super(name, description);
@@ -19,7 +20,7 @@ public class Epic extends Task{
         subtasks = new HashMap<>();
     }
 
-    public HashMap<Integer, Subtask> getSubtasks() {
+    public Map<Integer, Subtask> getSubtasks() {
         return subtasks;
     }
 

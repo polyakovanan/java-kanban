@@ -2,15 +2,15 @@ package ru.terralink.kanban.service;
 
 import ru.terralink.kanban.model.Task;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final ArrayList<Task> taskHistory;
+    private final List<Task> taskHistory;
     private int maxSize;
     public InMemoryHistoryManager(int size){
         this.maxSize = size;
-        taskHistory = new ArrayList<>();
+        taskHistory = new LinkedList<>();
     }
     @Override
     public void add(Task task) {
@@ -22,7 +22,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return taskHistory;
+        return new LinkedList<>(taskHistory);
     }
 
     public int getMaxSize() {

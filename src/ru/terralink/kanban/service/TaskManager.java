@@ -4,11 +4,11 @@ import ru.terralink.kanban.model.Subtask;
 import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 
 public interface TaskManager {
-    ArrayList<Task> getTasksByType(TaskType type);
+    List<Task> getTasksByType(TaskType type);
     boolean removeTasksByType(TaskType type);
     Task getTaskByIdAndType(int id, TaskType type);
     Task getTaskById(int id);
@@ -18,6 +18,6 @@ public interface TaskManager {
     boolean updateTaskById(Task task, int id);
     boolean deleteTaskByIdAndType(int id, TaskType type);
     boolean deleteTaskById(int id);
-    ArrayList<Subtask> getSubtasksByEpic(int id);
+    List<Subtask> getSubtasksByEpic(int id);
     List<Task> getHistory();
 }

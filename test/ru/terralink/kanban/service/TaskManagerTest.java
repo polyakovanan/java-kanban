@@ -1,10 +1,8 @@
-package service;
+package ru.terralink.kanban.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.terralink.kanban.model.*;
-import ru.terralink.kanban.service.Managers;
-import ru.terralink.kanban.service.TaskManager;
 
 import java.util.List;
 
