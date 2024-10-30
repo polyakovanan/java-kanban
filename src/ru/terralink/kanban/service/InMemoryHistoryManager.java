@@ -8,7 +8,7 @@ import java.util.*;
 public class InMemoryHistoryManager implements HistoryManager {
     private final PatheticLinkedList<Task> taskHistory;
     private final Map<Integer,Node> taskHash;
-    public InMemoryHistoryManager(){
+    public InMemoryHistoryManager() {
         taskHistory = new PatheticLinkedList<>();
         taskHash = new HashMap<>();
     }
@@ -16,7 +16,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         int taskId = task.getId();
         Node node = taskHash.get(taskId);
-        if(node != null){
+        if(node != null) {
             removeNode(node);
         }
         node = taskHistory.linkLast(task);
@@ -26,7 +26,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
         Node node = taskHash.get(id);
-        if(node != null){
+        if(node != null) {
             removeNode(node);
             taskHash.remove(id);
         }
@@ -37,7 +37,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         return taskHistory.getItems();
     }
 
-    private void removeNode(Node node){
+    private void removeNode(Node node) {
         Node nextNode = node.getNext();
         Node prevNode = node.getPrev();
 
@@ -51,7 +51,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             node.setNext(null);
         }
 
-        if (node.equals(taskHistory.first)){
+        if (node.equals(taskHistory.first)) {
             taskHistory.first = nextNode;
         }
         if (node.equals(taskHistory.last)) {
@@ -77,7 +77,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             return newNode;
         }
 
-        public List<E> getItems(){
+        public List<E> getItems() {
             List<E> items = new ArrayList<>();
             Node currentNode = first;
             while(currentNode != null) {

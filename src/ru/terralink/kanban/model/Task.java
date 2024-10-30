@@ -14,12 +14,12 @@ public class Task implements Cloneable {
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description){
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
     }
-    public Task(int id, String name, String description){
+    public Task(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;

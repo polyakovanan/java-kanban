@@ -13,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     private int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
     private final Map<TaskType, Map<Integer, Task>> taskStorage;
     private final HistoryManager historyManager;
-    public InMemoryTaskManager(){
+    public InMemoryTaskManager() {
         taskStorage = new HashMap<>();
         for (TaskType type : TaskType.values())
             taskStorage.put(type, new HashMap<>());
@@ -22,7 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Вернем список с целевым типом задачи
     @Override
-    public List<Task> getTasksByType(TaskType type){
+    public List<Task> getTasksByType(TaskType type) {
         return new ArrayList<>(taskStorage.get(type).values());
     }
 
@@ -31,14 +31,14 @@ public class InMemoryTaskManager implements TaskManager {
     * Сейчас нет сценариев с false, но это может быть заготовкой для обработки
     * ошибок в новой потенциальной логике.*/
     @Override
-    public boolean removeTasksByType(TaskType type){
+    public boolean removeTasksByType(TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         if (type == TaskType.EPIC) {
             //Если очистили все эпики, то все подзадачи тоже удалились.
             taskStorage.get(TaskType.SUBTASK).clear();
         } else if (type == TaskType.SUBTASK) {
             //Если очистили все подзадачи, то все эпики тоже опустели. Очистим в них ссылки на подзадачи
-            for (Task task : taskStorage.get(TaskType.EPIC).values()){
+            for (Task task : taskStorage.get(TaskType.EPIC).values()) {
                 Epic epic = (Epic)task;
                 epic.clearSubtasks();
             }
@@ -51,7 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
     /*Дадим возможность фронту запросить задачу по ее id и типу,
     * чтобы сократить время поиска по трем коллекциям */
     @Override
-    public Task getTaskByIdAndType(int id, TaskType type){
+    public Task getTaskByIdAndType(int id, TaskType type) {
         Task task = taskStorage.get(type).get(id);
         if (task != null) {
             historyManager.add(task);
@@ -64,10 +64,10 @@ public class InMemoryTaskManager implements TaskManager {
     * Тогда пройдемся по всем типам и вернем задачу как только она
     * где-то нашлась или null, если id еще не завели*/
     @Override
-    public Task getTaskById(int id){
+    public Task getTaskById(int id) {
         for (TaskType type : TaskType.values()) {
             Task task = getTaskByIdAndType(id, type);
-            if (task != null){
+            if (task != null) {
                 return (Task) task.clone();
             }
         }
@@ -79,7 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
     * (с точки зрения бизнес-логики - это уже будет обновление)
     * поэтому вернем id созданной задачи. Иначе -1*/
     @Override
-    public int createTaskByType(Task task, TaskType type){
+    public int createTaskByType(Task task, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
@@ -118,7 +118,7 @@ public class InMemoryTaskManager implements TaskManager {
     /*Если фронт по какой-то причине не может отдать тип задачи
     * определим его сами. Почему бы и нет*/
     @Override
-    public int createTask(Task task){
+    public int createTask(Task task) {
         return createTaskByType(task, task.getType());
     }
 
@@ -126,7 +126,7 @@ public class InMemoryTaskManager implements TaskManager {
     * то это не "ОБНОВЛЕНИЕ", а вставка. Поэтому вернем ошибку, если задачи
     * с таким id нет*/
     @Override
-    public boolean updateTaskByIdAndType(Task task, int id, TaskType type){
+    public boolean updateTaskByIdAndType(Task task, int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
@@ -151,7 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
                     Subtask originalSubtask = (Subtask) tasks.get(id);
                     Subtask newSubtask = (Subtask) task;
                     Epic newEpic = (Epic)taskStorage.get(TaskType.EPIC).get(newSubtask.getEpicId());
-                    if (originalSubtask.getEpicId() != newSubtask.getEpicId()){
+                    if (originalSubtask.getEpicId() != newSubtask.getEpicId()) {
                         Epic originalEpic = (Epic)taskStorage.get(TaskType.EPIC).get(originalSubtask.getEpicId());
                         originalEpic.removeSubtask(originalSubtask.getId());
                     }
@@ -167,14 +167,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*Тут тоже можем сами определить тип обновляемой задачи*/
     @Override
-    public boolean updateTaskById(Task task, int id){
+    public boolean updateTaskById(Task task, int id) {
         return updateTaskByIdAndType(task, id, task.getType());
     }
 
     /*И в очередной раз, следуя бизнес-логике, вернем ошибку, если удалять нечего.
     * Хоть этот процесс никак не вредит технической составляющей процесса*/
     @Override
-    public boolean deleteTaskByIdAndType(int id, TaskType type){
+    public boolean deleteTaskByIdAndType(int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
@@ -184,7 +184,7 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.remove(id);
                     Map<Integer, Subtask> epicSubtasks = epic.getSubtasks();
                     Map<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
-                    for (Integer subId : epicSubtasks.keySet()){
+                    for (Integer subId : epicSubtasks.keySet()) {
                         subtasks.remove(subId);
                         historyManager.remove(subId);
                     }
@@ -215,7 +215,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*Если не отдали тип задачи - перебираем коллекции по существующим типам*/
     @Override
-    public boolean deleteTaskById(int id){
+    public boolean deleteTaskById(int id) {
         for(TaskType type : TaskType.values()) {
             if (deleteTaskByIdAndType(id, type))
                 return true;
@@ -236,7 +236,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Task> getHistory(){
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 }

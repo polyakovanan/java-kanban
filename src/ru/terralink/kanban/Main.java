@@ -62,7 +62,7 @@ public class Main {
         System.out.println("Если ты это читаешь, значит оно не трейсит, ура");
     }
 
-    private static void printAll(TaskManager taskManager){
+    private static void printAll(TaskManager taskManager) {
         System.out.println("Эпики");
         System.out.println(taskManager.getTasksByType(TaskType.EPIC));
         System.out.println();
