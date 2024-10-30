@@ -63,7 +63,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         node.setItem(null);
     }
 
-    private static class PatheticLinkedList<E>{
+    private static class PatheticLinkedList<E> {
         private Node<E> first;
         private Node<E> last;
 
@@ -82,7 +82,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         public List<E> getItems() {
             List<E> items = new ArrayList<>();
             Node currentNode = first;
-            while(currentNode != null) {
+            while (currentNode != null) {
                 items.add((E) currentNode.getItem());
                 currentNode = currentNode.getNext();
             }
