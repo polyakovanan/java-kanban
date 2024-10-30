@@ -227,7 +227,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean deleteTaskById(int id) {
-        for(TaskType type : TaskType.values()) {
+        for (TaskType type : TaskType.values()) {
             if (deleteTaskByIdAndType(id, type))
                 return true;
         }

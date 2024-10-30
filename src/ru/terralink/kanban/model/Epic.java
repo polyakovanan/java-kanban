@@ -42,7 +42,7 @@ public class Epic extends Task{
 
     private void calcStatus() {
         int subtaskCount = subtasks.keySet().size();
-        if(subtaskCount == 0) {
+        if (subtaskCount == 0) {
             this.status = TaskStatus.NEW;
             return;
         }
@@ -61,7 +61,7 @@ public class Epic extends Task{
             }
         }
 
-        if(newCount == subtaskCount) {
+        if (newCount == subtaskCount) {
             this.status = TaskStatus.NEW;
         } else if (doneCount == subtaskCount) {
             this.status = TaskStatus.DONE;
