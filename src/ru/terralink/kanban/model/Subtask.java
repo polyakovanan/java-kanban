@@ -1,6 +1,6 @@
 package ru.terralink.kanban.model;
 
-public class Subtask extends Task{
+public class Subtask extends Task {
 
     private int epicId;
 
@@ -46,5 +46,7 @@ public class Subtask extends Task{
     }
 
     @Override
-    public TaskType getType() { return TaskType.SUBTASK; }
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
 }
