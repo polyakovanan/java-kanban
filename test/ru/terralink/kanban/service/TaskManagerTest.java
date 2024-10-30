@@ -275,6 +275,49 @@ public class TaskManagerTest {
         taskManager.getTaskById(3);
 
         List<Task> taskHistory = taskManager.getHistory();
-        Assertions.assertEquals(4, taskHistory.size(), "Менеджер задач вернул неверный журнал истории");
+        Assertions.assertEquals(3, taskHistory.size(), "Менеджер задач вернул неверный журнал истории");
+
+        taskManager.deleteTaskById(1);
+        taskHistory = taskManager.getHistory();
+        Assertions.assertEquals(2, taskHistory.size(), "Менеджер задач вернул неверный журнал истории");
+    }
+
+    @Test
+    void TasksInTaskManagerProtectedFromOuterChanges(){
+        TaskManager taskManager = Managers.getDefault();
+        Task task = new Task("Задача", "Задача");
+        taskManager.createTask(task);
+        Epic epic = new Epic("Эпик", "Эпик");
+        taskManager.createTask(epic);
+        Subtask subtask = new Subtask("Подзадача", "Подзадача", epic);
+        taskManager.createTask(subtask);
+
+        task.setName("Изменили имя у оригинала");
+        epic.setName("Изменили имя у оригинала");
+        subtask.setName("Изменили имя у оригинала");
+
+        Task taskInManager = taskManager.getTaskById(1);
+        Assertions.assertEquals("Задача", taskInManager.getName(), "Задача в менеджере изменена извне");
+
+        Epic epicInManager = (Epic) taskManager.getTaskById(2);
+        Assertions.assertEquals("Эпик", epicInManager.getName(), "Эпик в менеджере изменен извне");
+
+        Subtask subtaskInManager = (Subtask) taskManager.getTaskById(3);
+        Assertions.assertEquals("Подзадача", subtaskInManager.getName(), "Подзадача в менеджере изменена извне");
+
+
+        taskInManager.setName("Изменили имя у полученного из менеджера");
+        epicInManager.setName("Изменили имя у полученного из менеджера");
+        subtaskInManager.setName("Изменили имя у полученного из менеджера");
+
+        Task taskInManager2 = taskManager.getTaskById(1);
+        Assertions.assertEquals("Задача", taskInManager2.getName(), "Задача в менеджере изменена извне");
+
+        Epic epicInManager2 = (Epic) taskManager.getTaskById(2);
+        Assertions.assertEquals("Эпик", epicInManager2.getName(), "Эпик в менеджере изменен извне");
+
+        Subtask subtaskInManager2 = (Subtask) taskManager.getTaskById(3);
+        Assertions.assertEquals("Подзадача", subtaskInManager2.getName(), "Подзадача в менеджере изменена извне");
+
     }
 }

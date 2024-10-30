@@ -55,8 +55,9 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = taskStorage.get(type).get(id);
         if (task != null) {
             historyManager.add(task);
+            return (Task) task.clone();
         }
-        return task;
+        return null;
     }
 
     /*Или просто по id, если фронту неизвестен тип задачи.
@@ -67,7 +68,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (TaskType type : TaskType.values()) {
             Task task = getTaskByIdAndType(id, type);
             if (task != null){
-                return task;
+                return (Task) task.clone();
             }
         }
         return null;
@@ -86,13 +87,13 @@ public class InMemoryTaskManager implements TaskManager {
                 //и следовательно список его подзадач пуст (ничего каскадно создавать не надо)
                 Epic epic = (Epic) task;
                 epic.setId(++idCounter);
-                tasks.put(epic.getId(), epic);
+                tasks.put(epic.getId(), (Epic) epic.clone());
 
                 return idCounter;
             }
             case TASK -> {
                 task.setId(++idCounter);
-                tasks.put(task.getId(), task);
+                tasks.put(task.getId(), (Task) task.clone());
                 return idCounter;
             }
             case SUBTASK -> {
@@ -104,9 +105,9 @@ public class InMemoryTaskManager implements TaskManager {
                     return -1;
                 }
 
-                task.setId(++idCounter);
-                tasks.put(task.getId(), task);
-                targetEpic.addSubtask(subtask);
+                subtask.setId(++idCounter);
+                tasks.put(subtask.getId(), (Subtask) subtask.clone());
+                targetEpic.addSubtask((Subtask) subtask.clone());
                 return idCounter;
             }
         }
@@ -138,7 +139,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             case TASK -> {
                 if (tasks.containsKey(id)) {
-                    tasks.put(id, task);
+                    tasks.put(id, (Task) task.clone());
                     return true;
                 }
             }
@@ -154,8 +155,8 @@ public class InMemoryTaskManager implements TaskManager {
                         Epic originalEpic = (Epic)taskStorage.get(TaskType.EPIC).get(originalSubtask.getEpicId());
                         originalEpic.removeSubtask(originalSubtask.getId());
                     }
-                    newEpic.addSubtask(newSubtask);
-                    tasks.put(id, task);
+                    newEpic.addSubtask((Subtask) newSubtask.clone());
+                    tasks.put(id, (Task) task.clone());
                     return true;
                 }
             }
@@ -180,10 +181,12 @@ public class InMemoryTaskManager implements TaskManager {
                 if (tasks.containsKey(id)) {
                     //если удаляем эпик, то надо удалить все его подзадачи
                     final Epic epic = (Epic) tasks.remove(id);
+                    historyManager.remove(id);
                     Map<Integer, Subtask> epicSubtasks = epic.getSubtasks();
                     Map<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
                     for (Integer subId : epicSubtasks.keySet()){
                         subtasks.remove(subId);
+                        historyManager.remove(subId);
                     }
 
                     return true;
@@ -192,6 +195,7 @@ public class InMemoryTaskManager implements TaskManager {
             case TASK -> {
                 if (tasks.containsKey(id)) {
                     tasks.remove(id);
+                    historyManager.remove(id);
                     return true;
                 }
             }
@@ -201,6 +205,7 @@ public class InMemoryTaskManager implements TaskManager {
                     final Subtask subtask = (Subtask) tasks.remove(id);
                     Epic epic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                     epic.removeSubtask(id);
+                    historyManager.remove(id);
                     return true;
                 }
             }

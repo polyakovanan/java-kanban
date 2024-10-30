@@ -3,6 +3,9 @@ package ru.terralink.kanban.model;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 public class EpicTest {
 
     @Test
@@ -56,5 +59,21 @@ public class EpicTest {
         epic.addSubtask(subtask2);
         Assertions.assertEquals(TaskStatus.DONE, epic.getStatus(), "Эпик у которого все подзадачи в DONE не в статусе DONE");
 
+    }
+
+    @Test
+    void EpicCloneWorkProperly(){
+        Epic epic1 = new Epic(1, "Эпик 1", "Эпик 1");
+        Epic epic2 = (Epic) epic1.clone();
+        Assertions.assertEquals(epic1, epic2, "Клон эпика не равен оригиналу");
+        Assertions.assertNotSame(epic1, epic2, "Клон эпика ссылается на оригинал");
+
+        Map<Integer, Subtask> subtasks1 = epic1.getSubtasks();
+        Map<Integer, Subtask> subtasks2 = epic2.getSubtasks();
+
+        for (Integer id : subtasks1.keySet()){
+            Assertions.assertEquals(subtasks1.get(id), subtasks2.get(id), "Клон подзадачи эпика не равняется оригиналу");
+            Assertions.assertNotSame(subtasks1.get(id), subtasks2.get(id), "Клон подзадачи эпика ссылается на оригинал");
+        }
     }
 }

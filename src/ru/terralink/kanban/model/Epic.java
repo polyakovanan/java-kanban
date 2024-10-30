@@ -70,6 +70,15 @@ public class Epic extends Task{
     }
 
     @Override
+    public Object clone() {
+        Epic epic = new Epic(this.id, this.name, this.description);
+        for (Subtask subtask : this.subtasks.values()) {
+            epic.addSubtask((Subtask) subtask.clone());
+        }
+        return epic;
+    }
+
+    @Override
     public void setStatus(TaskStatus status) {
         throw new UnsupportedOperationException("Невозможно явно установить статус эпика, так как это расчетное значение");
     }

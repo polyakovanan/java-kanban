@@ -12,4 +12,12 @@ class TaskTest {
         Assertions.assertEquals(task1, task2, "Задачи не равны");
     }
 
+    @Test
+    void TaskCloneWorkProperly(){
+        Task task1 = new Task(1, "Задача 1", "Задача 1");
+        Task task2 = (Task) task1.clone();
+        Assertions.assertEquals(task1, task2, "Клон задачи не равен оригиналу");
+        Assertions.assertNotSame(task1, task2, "Клон задачи ссылается на оригинал");
+    }
+
 }

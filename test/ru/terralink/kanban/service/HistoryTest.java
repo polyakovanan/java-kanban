@@ -34,15 +34,122 @@ public class HistoryTest {
     }
 
     @Test
-    void historyManagerRemovesFirstAndAddsLastOnMaxSizeExceeded() {
+    void historyManagerReaddsFirstNodeInRightOrder(){
         HistoryManager historyManager = Managers.getDefaultHistory();
-        for (int i = 1; i <= historyManager.getMaxSize() + 1; i++) {
-            Task task = new Task(i, "Задача " + i, "Задача " + i);
-            historyManager.add(task);
-        }
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+        historyManager.add(task);
+
         List<Task> tasks = historyManager.getHistory();
 
-        Assertions.assertEquals(2,(tasks.get(0)).getId(), "Менеджер задач не удаляет первый элемент при переполнении");
-        Assertions.assertEquals(11,(tasks.get(historyManager.getMaxSize() - 1)).getId(), "Менеджер задач не добавляет последний элемент при переполнении");
+        Assertions.assertEquals(3, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(2,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(3,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(1,(tasks.get(2)).getId(), "Менеджер задач хранит задачи не в том порядке");
+    }
+
+    @Test
+    void historyManagerReaddsLastNodeInRightOrder(){
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+        historyManager.add(subtask);
+
+        List<Task> tasks = historyManager.getHistory();
+
+        Assertions.assertEquals(3, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(1,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(2,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(3,(tasks.get(2)).getId(), "Менеджер задач хранит задачи не в том порядке");
+    }
+
+    @Test
+    void historyManagerReaddsMiddleNodeInRightOrder(){
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+        historyManager.add(epic);
+
+        List<Task> tasks = historyManager.getHistory();
+
+        Assertions.assertEquals(3, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(1,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(3,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(2,(tasks.get(2)).getId(), "Менеджер задач хранит задачи не в том порядке");
+    }
+
+    @Test
+    void historyManagerRemovesFirstNode(){
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+
+        historyManager.remove(1);
+
+        List<Task> tasks = historyManager.getHistory();
+
+        Assertions.assertEquals(2, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(2,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(3,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
+    }
+
+    @Test
+    void historyManagerRemovesLastNode(){
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+
+        historyManager.remove(3);
+
+        List<Task> tasks = historyManager.getHistory();
+
+        Assertions.assertEquals(2, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(1,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(2,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
+    }
+
+    @Test
+    void historyManagerRemovesMiddleNode(){
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Task task = new Task(1, "Задача", "Задача");
+        Epic epic = new Epic(2, "Эпик", "Эпик");
+        Subtask subtask = new Subtask(3, "Подзадача", "Подзадача", epic);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+
+        historyManager.remove(2);
+
+        List<Task> tasks = historyManager.getHistory();
+
+        Assertions.assertEquals(2, tasks.size(), "Менеджер задач добавляет дубликат задачи");
+        Assertions.assertEquals(1,(tasks.get(0)).getId(), "Менеджер задач хранит задачи не в том порядке");
+        Assertions.assertEquals(3,(tasks.get(1)).getId(), "Менеджер задач хранит задачи не в том порядке");
     }
 }

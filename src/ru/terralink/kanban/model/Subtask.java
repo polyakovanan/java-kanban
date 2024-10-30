@@ -12,6 +12,11 @@ public class Subtask extends Task{
         this.epicId = epic.getId();
     }
 
+    private Subtask(int id, String name, String description, int epicId) {
+        super(id, name, description);
+        this.epicId = epicId;
+    }
+
     public int getEpicId() {
         return epicId;
     }
@@ -20,6 +25,12 @@ public class Subtask extends Task{
         this.epicId = epicId;
     }
 
+    @Override
+    public Object clone() {
+        Subtask subtask = new Subtask(this.id, this.name, this.description, this.epicId);
+        subtask.setStatus(this.getStatus());
+        return subtask;
+    }
 
     @Override
     public String toString() {

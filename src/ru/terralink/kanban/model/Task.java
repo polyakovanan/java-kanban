@@ -7,7 +7,7 @@ import java.util.Objects;
 * Подобная задача является небольшой самостоятельной единицей
  */
 
-public class Task {
+public class Task implements Cloneable {
 
     protected int id;
     protected String name;
@@ -37,6 +37,13 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public Object clone() {
+        Task task = new Task(this.id, this.name, this.description);
+        task.setStatus(this.status);
+        return task;
     }
 
     public int getId() {
