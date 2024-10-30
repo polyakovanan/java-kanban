@@ -15,6 +15,7 @@ public class Epic extends Task{
         super(name, description);
         subtasks = new HashMap<>();
     }
+
     public Epic(int id, String name, String description) {
         super(id, name, description);
         subtasks = new HashMap<>();
@@ -82,6 +83,7 @@ public class Epic extends Task{
     public void setStatus(TaskStatus status) {
         throw new UnsupportedOperationException("Невозможно явно установить статус эпика, так как это расчетное значение");
     }
+
     @Override
     public String toString() {
         return "Epic{" +
@@ -92,6 +94,7 @@ public class Epic extends Task{
                 ", subtasks=" + subtasks.keySet() +
                 '}';
     }
+
     @Override
     public TaskType getType() { return TaskType.EPIC; }
 }

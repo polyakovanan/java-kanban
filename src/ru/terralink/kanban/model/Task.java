@@ -19,6 +19,7 @@ public class Task implements Cloneable {
         this.description = description;
         this.status = TaskStatus.NEW;
     }
+
     public Task(int id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -53,6 +54,7 @@ public class Task implements Cloneable {
     public void setId(int id) {
         this.id = id;
     }
+
     public String getName() {
         return name;
     }

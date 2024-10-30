@@ -8,10 +8,12 @@ import java.util.*;
 public class InMemoryHistoryManager implements HistoryManager {
     private final PatheticLinkedList<Task> taskHistory;
     private final Map<Integer,Node> taskHash;
+
     public InMemoryHistoryManager() {
         taskHistory = new PatheticLinkedList<>();
         taskHash = new HashMap<>();
     }
+
     @Override
     public void add(Task task) {
         int taskId = task.getId();

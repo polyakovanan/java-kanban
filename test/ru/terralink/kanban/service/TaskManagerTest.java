@@ -13,6 +13,7 @@ public class TaskManagerTest {
         TaskManager taskManager = Managers.getDefault();
         Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач по умолчанию");
     }
+
     @Test
     void taskManagerCreatesTasksAndAssignsIncrementalIds(){
         TaskManager taskManager = Managers.getDefault();
@@ -88,6 +89,7 @@ public class TaskManagerTest {
         Assertions.assertEquals(0, taskManager.getTasksByType(TaskType.SUBTASK).size(), "Менеджер задач создает подзадачу с несуществующим эпиком");
 
     }
+
     @Test
     void taskManagerDeterminesCreatedType() {
         TaskManager taskManager = Managers.getDefault();

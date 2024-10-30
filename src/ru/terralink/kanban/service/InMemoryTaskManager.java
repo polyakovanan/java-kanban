@@ -13,6 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     private int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
     private final Map<TaskType, Map<Integer, Task>> taskStorage;
     private final HistoryManager historyManager;
+
     public InMemoryTaskManager() {
         taskStorage = new HashMap<>();
         for (TaskType type : TaskType.values())
@@ -21,6 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Вернем список с целевым типом задачи
+
     @Override
     public List<Task> getTasksByType(TaskType type) {
         return new ArrayList<>(taskStorage.get(type).values());
@@ -30,6 +32,7 @@ public class InMemoryTaskManager implements TaskManager {
     * Вернем true, чтобы обозначить успешность процесса для фронта.
     * Сейчас нет сценариев с false, но это может быть заготовкой для обработки
     * ошибок в новой потенциальной логике.*/
+
     @Override
     public boolean removeTasksByType(TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
@@ -50,6 +53,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*Дадим возможность фронту запросить задачу по ее id и типу,
     * чтобы сократить время поиска по трем коллекциям */
+
     @Override
     public Task getTaskByIdAndType(int id, TaskType type) {
         Task task = taskStorage.get(type).get(id);
@@ -63,6 +67,7 @@ public class InMemoryTaskManager implements TaskManager {
     /*Или просто по id, если фронту неизвестен тип задачи.
     * Тогда пройдемся по всем типам и вернем задачу как только она
     * где-то нашлась или null, если id еще не завели*/
+
     @Override
     public Task getTaskById(int id) {
         for (TaskType type : TaskType.values()) {
@@ -78,6 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
     * Если такой id уже есть, то "СОЗДАТЬ" мы его не можем
     * (с точки зрения бизнес-логики - это уже будет обновление)
     * поэтому вернем id созданной задачи. Иначе -1*/
+
     @Override
     public int createTaskByType(Task task, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
@@ -117,6 +123,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*Если фронт по какой-то причине не может отдать тип задачи
     * определим его сами. Почему бы и нет*/
+
     @Override
     public int createTask(Task task) {
         return createTaskByType(task, task.getType());
@@ -125,6 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
     /*Логика аналогична созданию задачи. Если задачи нет,
     * то это не "ОБНОВЛЕНИЕ", а вставка. Поэтому вернем ошибку, если задачи
     * с таким id нет*/
+
     @Override
     public boolean updateTaskByIdAndType(Task task, int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
@@ -166,6 +174,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*Тут тоже можем сами определить тип обновляемой задачи*/
+
     @Override
     public boolean updateTaskById(Task task, int id) {
         return updateTaskByIdAndType(task, id, task.getType());
@@ -173,6 +182,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /*И в очередной раз, следуя бизнес-логике, вернем ошибку, если удалять нечего.
     * Хоть этот процесс никак не вредит технической составляющей процесса*/
+
     @Override
     public boolean deleteTaskByIdAndType(int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
@@ -214,6 +224,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*Если не отдали тип задачи - перебираем коллекции по существующим типам*/
+
     @Override
     public boolean deleteTaskById(int id) {
         for(TaskType type : TaskType.values()) {
@@ -225,6 +236,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*Если есть такой эпик - отдаем его список подзадач*/
+
     @Override
     public List<Subtask> getSubtasksByEpic(int id) {
         Map<Integer, Task> tasks = taskStorage.get(TaskType.EPIC);
