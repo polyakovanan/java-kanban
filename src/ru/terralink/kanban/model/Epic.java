@@ -8,7 +8,7 @@ import java.util.Map;
 * как на фронт отдается списки задач
  */
 
-public class Epic extends Task{
+public class Epic extends Task {
     private final Map<Integer, Subtask> subtasks;
 
     public Epic(String name, String description) {
@@ -96,5 +96,7 @@ public class Epic extends Task{
     }
 
     @Override
-    public TaskType getType() { return TaskType.EPIC; }
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
 }

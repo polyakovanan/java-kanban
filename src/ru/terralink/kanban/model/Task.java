@@ -89,5 +89,7 @@ public class Task implements Cloneable {
                 '}';
     }
 
-    public TaskType getType() { return TaskType.TASK; }
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
 }
