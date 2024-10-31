@@ -62,14 +62,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         private Node<E> last;
 
         public Node<E> linkLast(E element) {
-            Node<E> lastNode = this.last;
-            Node<E> newNode = new Node<>(lastNode, element, null);
-            last = newNode;
-            if (lastNode == null) {
+            Node<E> newNode = new Node<>(last, element, null);
+            if (last == null) {
                 first = newNode;
             } else {
-                lastNode.setNext(newNode);
+                last.setNext(newNode);
             }
+            last = newNode;
             return newNode;
         }
 
