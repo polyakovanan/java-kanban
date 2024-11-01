@@ -8,13 +8,14 @@ import java.util.Map;
 * как на фронт отдается списки задач
  */
 
-public class Epic extends Task{
+public class Epic extends Task {
     private final Map<Integer, Subtask> subtasks;
 
     public Epic(String name, String description) {
         super(name, description);
         subtasks = new HashMap<>();
     }
+
     public Epic(int id, String name, String description) {
         super(id, name, description);
         subtasks = new HashMap<>();
@@ -24,35 +25,35 @@ public class Epic extends Task{
         return subtasks;
     }
 
-    public void addSubtask(Subtask subtask){
+    public void addSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
         calcStatus();
     }
 
-    public void removeSubtask(int id){
+    public void removeSubtask(int id) {
         subtasks.remove(id);
         calcStatus();
     }
 
-    public void clearSubtasks(){
+    public void clearSubtasks() {
         subtasks.clear();
         calcStatus();
     }
 
-    private void calcStatus(){
+    private void calcStatus() {
         int subtaskCount = subtasks.keySet().size();
-        if(subtaskCount == 0){
+        if (subtaskCount == 0) {
             this.status = TaskStatus.NEW;
             return;
         }
 
         int newCount = 0;
         int doneCount = 0;
-        for (Subtask subtask : subtasks.values()){
+        for (Subtask subtask : subtasks.values()) {
             TaskStatus subtaskStatus = subtask.getStatus();
-            if (subtaskStatus == TaskStatus.NEW){
+            if (subtaskStatus == TaskStatus.NEW) {
                 newCount++;
-            } else if (subtaskStatus == TaskStatus.DONE){
+            } else if (subtaskStatus == TaskStatus.DONE) {
                 doneCount++;
             } else {
                 this.status = TaskStatus.IN_PROGRESS;
@@ -60,7 +61,7 @@ public class Epic extends Task{
             }
         }
 
-        if(newCount == subtaskCount){
+        if (newCount == subtaskCount) {
             this.status = TaskStatus.NEW;
         } else if (doneCount == subtaskCount) {
             this.status = TaskStatus.DONE;
@@ -70,9 +71,19 @@ public class Epic extends Task{
     }
 
     @Override
+    public Object clone() {
+        Epic epic = new Epic(this.id, this.name, this.description);
+        for (Subtask subtask : this.subtasks.values()) {
+            epic.addSubtask((Subtask) subtask.clone());
+        }
+        return epic;
+    }
+
+    @Override
     public void setStatus(TaskStatus status) {
         throw new UnsupportedOperationException("Невозможно явно установить статус эпика, так как это расчетное значение");
     }
+
     @Override
     public String toString() {
         return "Epic{" +
@@ -83,6 +94,9 @@ public class Epic extends Task{
                 ", subtasks=" + subtasks.keySet() +
                 '}';
     }
+
     @Override
-    public TaskType getType() { return TaskType.EPIC; }
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
 }

@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
-        //Создайте две задачи, а также эпик с двумя подзадачами и эпик с одной подзадачей.
+        //Создайте две задачи, эпик с тремя подзадачами и эпик без подзадач.
         Task firstTask = new Task("Заехать в больницу", "Лучше ехать по Луначарского, там пробка меньше");
         taskManager.createTaskByType(firstTask, TaskType.TASK);
 
@@ -24,44 +24,45 @@ public class Main {
         Subtask secondSubtask = new Subtask("Пройти Sigil и Legacy of Rust", "А тут можно и нормально поиграть", firstEpic);
         taskManager.createTask(secondSubtask);
 
+        Subtask thirdSubtask = new Subtask("Пройти все WADники, которые получили Cacowards", "Это займет какое-то время...", firstEpic);
+        taskManager.createTask(thirdSubtask);
+
         Epic secondEpic = new Epic("Встать на работу", "Это действительно эпик");
         taskManager.createTaskByType(secondEpic, TaskType.EPIC);
 
-        Subtask thirdSubtask = new Subtask("Высунуть ногу из-под одеяла", "Че-то холодно", secondEpic);
-        taskManager.createTask(thirdSubtask);
-
-        //Распечатайте списки эпиков, задач и подзадач через System.out.println(..).
-        printAll(taskManager);
-
-        //Измените статусы созданных объектов, распечатайте их. Проверьте, что статус задачи и подзадачи сохранился, а статус эпика рассчитался по статусам подзадач.
-        firstTask.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.updateTaskById(firstTask, firstTask.getId());
-
-        secondTask.setStatus(TaskStatus.DONE);
-        taskManager.updateTaskByIdAndType(secondTask, secondTask.getId(), TaskType.TASK);
-
-        firstSubtask.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.updateTaskById(firstSubtask, firstSubtask.getId());
-
-        thirdSubtask.setStatus(TaskStatus.DONE);
-        taskManager.updateTaskById(thirdSubtask, thirdSubtask.getId());
-        printAll(taskManager);
-
-        taskManager.getTaskById(4);
+        //Запросите созданные задачи несколько раз в разном порядке.
+        //После каждого запроса выведите историю и убедитесь, что в ней нет повторов.
         taskManager.getTaskById(1);
+        System.out.println(taskManager.getHistory()); // [1]
+        taskManager.getTaskById(1);
+        System.out.println(taskManager.getHistory()); // [1]
         taskManager.getTaskById(2);
+        System.out.println(taskManager.getHistory()); // [1,2]
+        taskManager.getTaskById(3);
+        System.out.println(taskManager.getHistory()); // [1,2,3]
+        taskManager.getTaskById(2);
+        System.out.println(taskManager.getHistory()); // [1,3,2]
         taskManager.getTaskById(4);
-        printAll(taskManager);
+        System.out.println(taskManager.getHistory()); // [1,3,2,4]
+        taskManager.getTaskById(4);
+        System.out.println(taskManager.getHistory()); // [1,3,2,4]
+        taskManager.getTaskById(5);
+        System.out.println(taskManager.getHistory()); // [1,3,2,4,5]
+        taskManager.getTaskById(6);
+        System.out.println(taskManager.getHistory()); // [1,3,2,4,5,6]
 
-        //И, наконец, попробуйте удалить одну из задач и один из эпиков.
-        taskManager.deleteTaskById(secondTask.getId());
-        taskManager.deleteTaskByIdAndType(secondEpic.getId(), TaskType.EPIC);
-        printAll(taskManager);
+        //Удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться.
+        taskManager.deleteTaskById(2);
+        System.out.println(taskManager.getHistory()); // [1,3,4,5,6]
+
+        //Удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи.
+        taskManager.deleteTaskById(3);
+        System.out.println(taskManager.getHistory()); // [1]
 
         System.out.println("Если ты это читаешь, значит оно не трейсит, ура");
     }
 
-    private static void printAll(TaskManager taskManager){
+    private static void printAll(TaskManager taskManager) {
         System.out.println("Эпики");
         System.out.println(taskManager.getTasksByType(TaskType.EPIC));
         System.out.println();

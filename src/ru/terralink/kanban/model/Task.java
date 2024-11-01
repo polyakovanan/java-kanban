@@ -7,19 +7,20 @@ import java.util.Objects;
 * Подобная задача является небольшой самостоятельной единицей
  */
 
-public class Task {
+public class Task implements Cloneable {
 
     protected int id;
     protected String name;
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description){
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
     }
-    public Task(int id, String name, String description){
+
+    public Task(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -39,6 +40,13 @@ public class Task {
         return Objects.hashCode(id);
     }
 
+    @Override
+    public Object clone() {
+        Task task = new Task(this.id, this.name, this.description);
+        task.setStatus(this.status);
+        return task;
+    }
+
     public int getId() {
         return id;
     }
@@ -46,6 +54,7 @@ public class Task {
     public void setId(int id) {
         this.id = id;
     }
+
     public String getName() {
         return name;
     }
@@ -80,5 +89,7 @@ public class Task {
                 '}';
     }
 
-    public TaskType getType() { return TaskType.TASK; }
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
 }

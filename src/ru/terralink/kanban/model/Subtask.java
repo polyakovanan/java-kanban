@@ -1,15 +1,22 @@
 package ru.terralink.kanban.model;
 
-public class Subtask extends Task{
+public class Subtask extends Task {
 
     private int epicId;
+
     public Subtask(String name, String description, Epic epic) {
         super(name, description);
         this.epicId = epic.getId();
     }
+
     public Subtask(int id, String name, String description, Epic epic) {
         super(id, name, description);
         this.epicId = epic.getId();
+    }
+
+    private Subtask(int id, String name, String description, int epicId) {
+        super(id, name, description);
+        this.epicId = epicId;
     }
 
     public int getEpicId() {
@@ -20,6 +27,12 @@ public class Subtask extends Task{
         this.epicId = epicId;
     }
 
+    @Override
+    public Object clone() {
+        Subtask subtask = new Subtask(this.id, this.name, this.description, this.epicId);
+        subtask.setStatus(this.getStatus());
+        return subtask;
+    }
 
     @Override
     public String toString() {
@@ -33,5 +46,7 @@ public class Subtask extends Task{
     }
 
     @Override
-    public TaskType getType() { return TaskType.SUBTASK; }
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
 }
