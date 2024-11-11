@@ -10,9 +10,9 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
-    private final Map<TaskType, Map<Integer, Task>> taskStorage;
-    private final HistoryManager historyManager;
+    protected int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
+    protected final Map<TaskType, Map<Integer, Task>> taskStorage;
+    protected final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         taskStorage = new HashMap<>();

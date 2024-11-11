@@ -79,16 +79,6 @@ public class Task implements Cloneable {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
-    }
-
     public TaskType getType() {
         return TaskType.TASK;
     }
