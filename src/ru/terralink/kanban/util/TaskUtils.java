@@ -3,6 +3,7 @@ package ru.terralink.kanban.util;
 import ru.terralink.kanban.model.*;
 
 public class TaskUtils {
+    public static final String TEXT_FILE_HEADER = "id,type,name,status,description,epic";
 
     public static String toString(Task task) {
         return String.format("%s,%s,%s,%s,%s,%s", task.getId(), task.getType(), task.getName(), task.getStatus(),
@@ -11,7 +12,7 @@ public class TaskUtils {
 
     public static Task fromString(String value) throws IllegalArgumentException {
         String[] elements = value.split(",");
-        if (elements.length != 6) {
+        if (elements.length < 5 || elements.length > 6) {
             throw new IllegalArgumentException("Количество элементов в строке не соответствует модели данных");
         }
 

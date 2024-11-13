@@ -1,22 +1,69 @@
 package ru.terralink.kanban.service;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import ru.terralink.kanban.model.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-public class TaskManagerTest {
+public class FileBackedTaskManagerTest {
+    File saveFile;
+    static File loadFile;
+    String saveFileContentCheck;
+    static final String resourcePath = "resources" + File.separator + "test" + File.separator + "service" + File.separator + "FileBackedTaskManager" + File.separator;
 
-    @Test
-    void managersReturnNotNullTaskManagerByDefault(){
-        TaskManager taskManager = Managers.getDefault();
-        Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач по умолчанию");
+    @BeforeAll
+    static void createFileForLoadingCheck(){
+        loadFile = Paths.get(resourcePath + "createFileForLoadingCheck").toFile();
+    }
+
+    @BeforeEach
+    void createSaveFile(){
+        try {
+            saveFile = Files.createTempFile("fileBackedTest", ".txt").toFile();
+        } catch (IOException e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @AfterEach
+    void checkSaveFileContent(){
+        try {
+            String saveContent = Files.readString(saveFile.toPath(), StandardCharsets.UTF_8);
+            String checkContent = Files.readString(Path.of(resourcePath + saveFileContentCheck), StandardCharsets.UTF_8);
+            Assertions.assertEquals(saveContent, checkContent, "Содержимое файла сохранения не совпадает с проверочными для " + saveFileContentCheck);
+        } catch (IOException e) {
+            Assertions.fail(saveFileContentCheck + " " + e.getMessage());
+        }
     }
 
     @Test
-    void taskManagerCreatesTasksAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
+    void managersReturnNotNullFileBackedTaskManager(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
+        Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач с файлом сохранения");
+        saveFileContentCheck = "managersReturnNotNullFileBackedTaskManager";
+    }
+
+    @Test
+    void managersLoadFileBackedTaskManagerCorrectly(){
+        TaskManager taskManager = null;
+        try {
+            taskManager = Managers.loadFromFile(loadFile);
+        } catch (IOException e) {
+            Assertions.fail("Ошибка создания менеджера " + e.getMessage());
+        }
+        Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач с файлом сохранения");
+        saveFileContentCheck = "managersReturnNotNullFileBackedTaskManager";
+    }
+
+    @Test
+    void fileBackedTaskManagerCreatesTasksAndAssignsIncrementalIds(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
 
         Task task1 = new Task("Задача 1", "Задача 1");
         Task task2 = new Task("Задача 2", "Задача 2");
@@ -29,11 +76,13 @@ public class TaskManagerTest {
 
         List<Task> tasks = taskManager.getTasksByType(TaskType.TASK);
         Assertions.assertEquals(2, tasks.size(), "Менеджер задач не добавил задачи в список");
+
+        saveFileContentCheck = "fileBackedTaskManagerCreatesTasksAndAssignsIncrementalIds";
     }
 
     @Test
-    void taskManagerCreatesEpicsAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerCreatesEpicsAndAssignsIncrementalIds(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
 
         Epic epic1 = new Epic("Эпик 1", "Эпик 1");
         Epic epic2 = new Epic("Эпик 2", "Эпик 2");
@@ -46,11 +95,13 @@ public class TaskManagerTest {
 
         List<Task> tasks = taskManager.getTasksByType(TaskType.EPIC);
         Assertions.assertEquals(2, tasks.size(), "Менеджер задач не добавил эпики в список");
+
+        saveFileContentCheck = "fileBackedTaskManagerCreatesEpicsAndAssignsIncrementalIds";
     }
 
     @Test
-    void taskManagerCreatesSubtasksAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerCreatesSubtasksAndAssignsIncrementalIds(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик 1", "Эпик 1");
 
         int id = taskManager.createTaskByType(epic, TaskType.EPIC);
@@ -72,11 +123,13 @@ public class TaskManagerTest {
         Assertions.assertNotNull("Менеджер задач не добавил эпик в список");
 
         Assertions.assertEquals(2, returnEpic.getSubtasks().values().size(), "Менеджер задач не добавил подзадачи в эпик");
+
+        saveFileContentCheck = "fileBackedTaskManagerCreatesSubtasksAndAssignsIncrementalIds";
     }
 
     @Test
-    void taskManagerDoesNotCreateSubtaskWithAbsentEpic(){
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerDoesNotCreateSubtaskWithAbsentEpic(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
         taskManager.removeTasksByType(TaskType.EPIC);
@@ -88,11 +141,12 @@ public class TaskManagerTest {
         Assertions.assertEquals(-1, id, "Менеджер задач не вернул ошибку при создании подзадачи с несуществующим эпиком");
         Assertions.assertEquals(0, taskManager.getTasksByType(TaskType.SUBTASK).size(), "Менеджер задач создает подзадачу с несуществующим эпиком");
 
+        saveFileContentCheck = "fileBackedTaskManagerDoesNotCreateSubtaskWithAbsentEpic";
     }
 
     @Test
-    void taskManagerDeterminesCreatedType() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerDeterminesCreatedType() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Assertions.assertEquals(1, taskManager.getTasksByType(TaskType.TASK).size(), "Менеджер задач не закидывает задачу в нужный тип");
@@ -102,11 +156,13 @@ public class TaskManagerTest {
         Subtask subtask = new Subtask("Подзадача", "Подзадача", epic);
         taskManager.createTask(subtask);
         Assertions.assertEquals(1, taskManager.getTasksByType(TaskType.SUBTASK).size(), "Менеджер задач не закидывает подзадачу в нужный тип");
+
+        saveFileContentCheck = "fileBackedTaskManagerDeterminesCreatedType";
     }
 
     @Test
-    void taskManagerGetsTaskById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerGetsTaskById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");
@@ -118,11 +174,12 @@ public class TaskManagerTest {
         Assertions.assertEquals("Эпик", taskManager.getTaskById(epic.getId()).getName(), "Менеджер задач не может найти эпик по id");
         Assertions.assertEquals("Подзадача", taskManager.getTaskById(subtask.getId()).getName(), "Менеджер задач не может найти подзадачу по id");
 
+        saveFileContentCheck = "fileBackedTaskManagerGetsTaskById";
     }
 
     @Test
-    void taskManagerUpdatesTaskById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerUpdatesTaskById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
 
@@ -133,11 +190,13 @@ public class TaskManagerTest {
         Task returnTask = taskManager.getTaskById(task.getId());
 
         Assertions.assertEquals("Бабача", returnTask.getName(), "Менеджер задач не может обновить задачу по id");
+
+        saveFileContentCheck = "fileBackedTaskManagerUpdatesTaskById";
     }
 
     @Test
-    void taskManagerUpdatesSubtaskReferenceToEpicById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerUpdatesSubtaskReferenceToEpicById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic1 = new Epic("Эпик 1", "Эпик 1");
         taskManager.createTask(epic1);
 
@@ -152,11 +211,13 @@ public class TaskManagerTest {
         Subtask returnTask = (Subtask) taskManager.getTaskById(subtask.getId());
 
         Assertions.assertEquals(epic2.getId(), returnTask.getEpicId(), "Менеджер задач не может обновить подзадачу по id");
+
+        saveFileContentCheck = "fileBackedTaskManagerUpdatesSubtaskReferenceToEpicById";
     }
 
     @Test
-    void taskManagerUpdatesEpicById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerUpdatesEpicById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -164,11 +225,13 @@ public class TaskManagerTest {
 
         taskManager.updateTaskById(epic, epic.getId());
         Assertions.assertEquals("Кекик", epic.getName(), "Менеджер задач не может обновить эпик по id");
+
+        saveFileContentCheck = "fileBackedTaskManagerUpdatesEpicById";
     }
 
     @Test
-    void taskManagerUpdatesEpicSubtaskListAndCalcsStatus() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerUpdatesEpicSubtaskListAndCalcsStatus() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -183,11 +246,13 @@ public class TaskManagerTest {
 
         Assertions.assertEquals(1, returnEpic.getSubtasks().size(), "Менеджер задач не может добавить подзадачу в эпик");
         Assertions.assertEquals(TaskStatus.IN_PROGRESS, returnEpic.getStatus(), "Менеджер задач не может пересчитать статус эпика после добавления подзадачи");
+
+        saveFileContentCheck = "fileBackedTaskManagerUpdatesEpicSubtaskListAndCalcsStatus";
     }
 
     @Test
-    void taskManagerClearsTasksByTypes() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerClearsTasksByTypes() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         taskManager.removeTasksByType(TaskType.TASK);
@@ -205,20 +270,23 @@ public class TaskManagerTest {
         taskManager.removeTasksByType(TaskType.EPIC);
         Assertions.assertEquals(0, taskManager.getTasksByType(TaskType.EPIC).size(), "Менеджер задач не очищает список эпиков");
 
+        saveFileContentCheck = "fileBackedTaskManagerClearsTasksByTypes";
     }
 
     @Test
-    void taskManagerDeletesTaskById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerDeletesTaskById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         taskManager.deleteTaskById(task.getId());
         Assertions.assertNull(taskManager.getTaskById(task.getId()), "Менеджер задач не удаляет задачу по id");
+
+        saveFileContentCheck = "fileBackedTaskManagerDeletesTaskById";
     }
 
     @Test
-    void taskManagerDeletesEpicAndItsSubtasksById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerDeletesEpicAndItsSubtasksById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -228,11 +296,13 @@ public class TaskManagerTest {
         taskManager.deleteTaskById(epic.getId());
         Assertions.assertNull(taskManager.getTaskById(epic.getId()), "Менеджер задач не удаляет эпик по id");
         Assertions.assertNull(taskManager.getTaskById(subtask.getId()), "Менеджер задач не удаляет подзадачи удаленного эпика");
+
+        saveFileContentCheck = "fileBackedTaskManagerDeletesEpicAndItsSubtasksById";
     }
 
     @Test
-    void taskManagerDeletesSubtaskAndFromEpicById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerDeletesSubtaskAndFromEpicById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -245,11 +315,13 @@ public class TaskManagerTest {
         Epic returnEpic = (Epic) taskManager.getTaskByIdAndType(epic.getId(), TaskType.EPIC);
 
         Assertions.assertEquals(0, returnEpic.getSubtasks().size(), "Менеджер задач не удаляет удаленные подзадачи из эпика");
+
+        saveFileContentCheck = "fileBackedTaskManagerDeletesSubtaskAndFromEpicById";
     }
 
     @Test
-    void taskManagerReturnsEpicSubtasksById() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerReturnsEpicSubtasksById() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -259,11 +331,13 @@ public class TaskManagerTest {
 
         Assertions.assertNotEquals(0, subtasks.size(), "Менеджер задач вернул пустой список подзадач эпика");
         Assertions.assertEquals(subtask, subtasks.get(0), "Менеджер задач вернул неверный список подзадач эпика");
+
+        saveFileContentCheck = "fileBackedTaskManagerReturnsEpicSubtasksById";
     }
 
     @Test
-    void taskManagerReturnsAddsTaskHistory() {
-        TaskManager taskManager = Managers.getDefault();
+    void fileBackedTaskManagerReturnsAddsTaskHistory() {
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");
@@ -282,11 +356,13 @@ public class TaskManagerTest {
         taskManager.deleteTaskById(1);
         taskHistory = taskManager.getHistory();
         Assertions.assertEquals(2, taskHistory.size(), "Менеджер задач вернул неверный журнал истории");
+
+        saveFileContentCheck = "fileBackedTaskManagerReturnsAddsTaskHistory";
     }
 
     @Test
-    void TasksInTaskManagerProtectedFromOuterChanges(){
-        TaskManager taskManager = Managers.getDefault();
+    void tasksInFileBackedTaskManagerProtectedFromOuterChanges(){
+        TaskManager taskManager = Managers.getFileBackedTaskManager(saveFile);
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");
@@ -321,5 +397,6 @@ public class TaskManagerTest {
         Subtask subtaskInManager2 = (Subtask) taskManager.getTaskById(3);
         Assertions.assertEquals("Подзадача", subtaskInManager2.getName(), "Подзадача в менеджере изменена извне");
 
+        saveFileContentCheck = "tasksInFileBackedTaskManagerProtectedFromOuterChanges";
     }
 }

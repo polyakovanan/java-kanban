@@ -19,26 +19,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.saveFile = saveFile;
     }
 
-    public static FileBackedTaskManager loadFromFile(File saveFile) throws IOException, IllegalArgumentException {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(saveFile);
-        try {
-            String fileContent = Files.readString(saveFile.toPath(), StandardCharsets.UTF_8);
-            String[] lines = fileContent.split(System.lineSeparator());
-            for (String line : lines) {
-                try {
-                    Task task = TaskUtils.fromString(line);
-                    fileBackedTaskManager.createTask(task);
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException(String.format("Ошибка в строке '%s': %s", line, e.getMessage()));
-                }
-            }
-        } catch (IOException e) {
-            throw new IOException("Ошибка чтения файла: " + e.getMessage());
-        }
-
-        return fileBackedTaskManager;
-    }
-
     @Override
     public boolean removeTasksByType(TaskType type) {
         boolean result = super.removeTasksByType(type);
@@ -98,7 +78,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() {
         try (FileWriter fileWriter = new FileWriter(this.saveFile, StandardCharsets.UTF_8)) {
-            fileWriter.write("id,type,name,status,description,epic");
+            fileWriter.write(TaskUtils.TEXT_FILE_HEADER);
             fileWriter.write(System.lineSeparator());
             for (Task task : this.taskStorage.get(TaskType.TASK).values()){
                 fileWriter.write(TaskUtils.toString(task));
