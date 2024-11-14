@@ -14,6 +14,10 @@ import java.nio.file.Files;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File saveFile;
 
+    public File getSaveFile(){
+        return saveFile;
+    }
+
     public FileBackedTaskManager(File saveFile) {
         super();
         this.saveFile = saveFile;

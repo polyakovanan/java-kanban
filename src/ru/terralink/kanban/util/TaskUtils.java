@@ -45,7 +45,7 @@ public class TaskUtils {
         if (type == TaskType.SUBTASK) {
             try {
                 epicId = Integer.parseInt(elements[5]);
-            } catch (NumberFormatException e) {
+            } catch (NullPointerException | NumberFormatException e) {
                 throw new IllegalArgumentException("Не удалось прочитать id эпика объекта");
             }
         }

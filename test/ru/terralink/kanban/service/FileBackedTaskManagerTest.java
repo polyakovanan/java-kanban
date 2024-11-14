@@ -58,7 +58,20 @@ public class FileBackedTaskManagerTest {
             Assertions.fail("Ошибка создания менеджера " + e.getMessage());
         }
         Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач с файлом сохранения");
-        saveFileContentCheck = "managersReturnNotNullFileBackedTaskManager";
+
+        Task task = taskManager.getTaskById(1);
+        Assertions.assertNotNull(task, "Менеджер задач не загрузил задачу из файла");
+
+        Epic epic = (Epic) taskManager.getTaskById(2);
+        Assertions.assertNotNull(epic, "Менеджер задач не загрузил эпик из файла");
+
+        Subtask subtask = (Subtask) taskManager.getTaskById(3);
+        Assertions.assertNotNull(subtask, "Менеджер задач не загрузил подзадачу из файла");
+
+        Assertions.assertEquals(epic.getSubtasks().get(3), subtask, "Менеджер задач не связал подзадачу с эпиком из файла");
+
+        saveFile = ((FileBackedTaskManager) taskManager).getSaveFile();
+        saveFileContentCheck = "managersLoadFileBackedTaskManagerCorrectly";
     }
 
     @Test
