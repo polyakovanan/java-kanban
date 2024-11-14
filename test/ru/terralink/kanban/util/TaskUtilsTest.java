@@ -43,7 +43,7 @@ public class TaskUtilsTest {
         Assertions.assertEquals(epic.getName(), "Эпик 1", "TaskUtils неверно парсит имя эпика из строки");
         Assertions.assertEquals(epic.getDescription(), "Описание 1", "TaskUtils неверно парсит описание эпика из строки");
         Assertions.assertEquals(epic.getStatus(), TaskStatus.NEW, "TaskUtils неверно парсит статус эпика из строки");
-        Assertions.assertEquals(epic.getType(), TaskType.TASK, "TaskUtils неверно парсит тип эпика из строки");
+        Assertions.assertEquals(epic.getType(), TaskType.EPIC, "TaskUtils неверно парсит тип эпика из строки");
     }
 
     @Test
@@ -53,8 +53,8 @@ public class TaskUtilsTest {
         Assertions.assertEquals(subtask.getName(), "Подзадача 1", "TaskUtils неверно парсит имя подзадачи из строки");
         Assertions.assertEquals(subtask.getDescription(), "Описание 1", "TaskUtils неверно парсит описание подзадачи из строки");
         Assertions.assertEquals(subtask.getStatus(), TaskStatus.NEW, "TaskUtils неверно парсит статус подзадачи из строки");
-        Assertions.assertEquals(subtask.getType(), TaskType.TASK, "TaskUtils неверно парсит тип подзадачи из строки");
-        Assertions.assertEquals(subtask.getEpicId(), TaskType.TASK, "TaskUtils неверно парсит родительский подзадачи из строки");
+        Assertions.assertEquals(subtask.getType(), TaskType.SUBTASK, "TaskUtils неверно парсит тип подзадачи из строки");
+        Assertions.assertEquals(subtask.getEpicId(), 2, "TaskUtils неверно парсит родительский подзадачи из строки");
     }
 
     @Test
