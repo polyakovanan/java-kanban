@@ -9,12 +9,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File saveFile;
 
-    public File getSaveFile(){
+    public File getSaveFile() {
         return saveFile;
     }
 
@@ -84,16 +83,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (FileWriter fileWriter = new FileWriter(this.saveFile, StandardCharsets.UTF_8)) {
             fileWriter.write(TaskUtils.TEXT_FILE_HEADER);
             fileWriter.write(System.lineSeparator());
-            for (Task task : this.taskStorage.get(TaskType.TASK).values()){
+            for (Task task : this.taskStorage.get(TaskType.TASK).values()) {
                 fileWriter.write(TaskUtils.toString(task));
                 fileWriter.write(System.lineSeparator());
             }
             //эпики обязательно должны быть записаны до подзадач, иначе потом будут проблемы с чтением
-            for (Task task : this.taskStorage.get(TaskType.EPIC).values()){
+            for (Task task : this.taskStorage.get(TaskType.EPIC).values()) {
                 fileWriter.write(TaskUtils.toString(task));
                 fileWriter.write(System.lineSeparator());
             }
-            for (Task task : this.taskStorage.get(TaskType.SUBTASK).values()){
+            for (Task task : this.taskStorage.get(TaskType.SUBTASK).values()) {
                 fileWriter.write(TaskUtils.toString(task));
                 fileWriter.write(System.lineSeparator());
             }
