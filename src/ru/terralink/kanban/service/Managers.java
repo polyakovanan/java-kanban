@@ -45,12 +45,13 @@ public class Managers {
                 } else {
                     try {
                         Task task = TaskUtils.fromString(lines[i]);
-                        fileBackedTaskManager.createTask(task);
+                        fileBackedTaskManager.addParsedTask(task);
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException(String.format("Ошибка в строке '%s': %s", lines[i], e.getMessage()));
                     }
                 }
             }
+            fileBackedTaskManager.save();
         } catch (IOException e) {
             throw new IOException("Ошибка чтения файла: " + e.getMessage());
         }

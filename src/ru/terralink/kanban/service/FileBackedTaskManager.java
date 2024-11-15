@@ -1,6 +1,8 @@
 package ru.terralink.kanban.service;
 
 import ru.terralink.kanban.exception.ManagerSaveException;
+import ru.terralink.kanban.model.Epic;
+import ru.terralink.kanban.model.Subtask;
 import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
 import ru.terralink.kanban.util.TaskUtils;
@@ -79,7 +81,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return false;
     }
 
-    private void save() {
+    public void addParsedTask(Task task) {
+        taskStorage.get(task.getType()).put(task.getId(), task);
+        if (task.getType() == TaskType.SUBTASK) {
+            Subtask subtask = (Subtask) task;
+            Epic epic = (Epic) taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
+            if (epic != null) {
+                epic.addSubtask(subtask);
+            }
+        }
+    }
+
+    public void save() {
         try (FileWriter fileWriter = new FileWriter(this.saveFile, StandardCharsets.UTF_8)) {
             fileWriter.write(TaskUtils.TEXT_FILE_HEADER);
             fileWriter.write(System.lineSeparator());

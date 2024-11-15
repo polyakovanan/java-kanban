@@ -5,6 +5,10 @@ import ru.terralink.kanban.model.*;
 public class TaskUtils {
     public static final String TEXT_FILE_HEADER = "id,type,name,status,description,epic";
 
+    private TaskUtils() {
+
+    }
+
     public static String toString(Task task) {
         return String.format("%s,%s,%s,%s,%s,%s", task.getId(), task.getType(), task.getName(), task.getStatus(),
                 task.getDescription(), task.getType() == TaskType.SUBTASK ? ((Subtask)task).getEpicId() : "");
@@ -23,19 +27,15 @@ public class TaskUtils {
             throw new IllegalArgumentException("Не удалось прочитать id объекта");
         }
 
-        TaskType type;
-        try {
-            type = TaskType.valueOf(elements[1]);
-        } catch (NullPointerException | IllegalArgumentException e) {
+        TaskType type = TaskType.parseTaskType(elements[1]);
+        if (type == TaskType.OPTIONAL) {
             throw new IllegalArgumentException("Невалидный тип объекта");
         }
 
         String name = elements[2];
 
-        TaskStatus status;
-        try {
-            status = TaskStatus.valueOf(elements[3]);
-        } catch (NullPointerException | IllegalArgumentException e) {
+        TaskStatus status = TaskStatus.parseTaskStatus(elements[3]);
+        if (status == TaskStatus.OPTIONAL) {
             throw new IllegalArgumentException("Невалидный статус объекта");
         }
 
@@ -45,7 +45,7 @@ public class TaskUtils {
         if (type == TaskType.SUBTASK) {
             try {
                 epicId = Integer.parseInt(elements[5]);
-            } catch (NullPointerException | NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Не удалось прочитать id эпика объекта");
             }
         }
@@ -60,7 +60,10 @@ public class TaskUtils {
                 parsedObject = new Subtask(id, name, description, epicId);
                 parsedObject.setStatus(status);
             }
-            case EPIC -> parsedObject = new Epic(id, name, description);
+            case EPIC -> {
+                parsedObject = new Epic(id, name, description);
+                parsedObject.setStatus(status);
+            }
         }
 
         return parsedObject;
