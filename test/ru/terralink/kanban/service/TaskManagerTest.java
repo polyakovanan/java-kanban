@@ -269,7 +269,7 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    void TasksInTaskManagerProtectedFromOuterChanges(){
+    void tasksInTaskManagerProtectedFromOuterChanges() {
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");

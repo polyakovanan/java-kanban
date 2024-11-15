@@ -183,8 +183,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Override
     @Test
-    void TasksInTaskManagerProtectedFromOuterChanges() {
-        super.TasksInTaskManagerProtectedFromOuterChanges();
-        saveFileContentCheck = "TasksInFileBackedTaskManagerProtectedFromOuterChanges";
+    void tasksInTaskManagerProtectedFromOuterChanges() {
+        super.tasksInTaskManagerProtectedFromOuterChanges();
+        saveFileContentCheck = "tasksInFileBackedTaskManagerProtectedFromOuterChanges";
     }
 }
