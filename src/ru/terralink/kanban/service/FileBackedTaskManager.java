@@ -82,6 +82,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public void addParsedTask(Task task) {
+        if (task.getId() > super.idCounter) {
+            super.idCounter = task.getId();
+        }
         taskStorage.get(task.getType()).put(task.getId(), task);
         if (task.getType() == TaskType.SUBTASK) {
             Subtask subtask = (Subtask) task;
