@@ -1,23 +1,23 @@
 package ru.terralink.kanban.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.terralink.kanban.model.*;
 
 import java.util.List;
 
-public class TaskManagerTest {
+public abstract class TaskManagerTest {
+    protected TaskManager taskManager;
 
-    @Test
-    void managersReturnNotNullTaskManagerByDefault(){
-        TaskManager taskManager = Managers.getDefault();
+    @BeforeEach
+    void initTaskManager() {
+        taskManager = Managers.getDefault();
         Assertions.assertNotNull(taskManager, "Managers не отдает менеджер задач по умолчанию");
     }
 
     @Test
-    void taskManagerCreatesTasksAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
-
+    void taskManagerCreatesTasksAndAssignsIncrementalIds() {
         Task task1 = new Task("Задача 1", "Задача 1");
         Task task2 = new Task("Задача 2", "Задача 2");
 
@@ -32,9 +32,7 @@ public class TaskManagerTest {
     }
 
     @Test
-    void taskManagerCreatesEpicsAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
-
+    void taskManagerCreatesEpicsAndAssignsIncrementalIds() {
         Epic epic1 = new Epic("Эпик 1", "Эпик 1");
         Epic epic2 = new Epic("Эпик 2", "Эпик 2");
 
@@ -49,8 +47,7 @@ public class TaskManagerTest {
     }
 
     @Test
-    void taskManagerCreatesSubtasksAndAssignsIncrementalIds(){
-        TaskManager taskManager = Managers.getDefault();
+    void taskManagerCreatesSubtasksAndAssignsIncrementalIds() {
         Epic epic = new Epic("Эпик 1", "Эпик 1");
 
         int id = taskManager.createTaskByType(epic, TaskType.EPIC);
@@ -75,8 +72,7 @@ public class TaskManagerTest {
     }
 
     @Test
-    void taskManagerDoesNotCreateSubtaskWithAbsentEpic(){
-        TaskManager taskManager = Managers.getDefault();
+    void taskManagerDoesNotCreateSubtaskWithAbsentEpic() {
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
         taskManager.removeTasksByType(TaskType.EPIC);
@@ -92,7 +88,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerDeterminesCreatedType() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Assertions.assertEquals(1, taskManager.getTasksByType(TaskType.TASK).size(), "Менеджер задач не закидывает задачу в нужный тип");
@@ -106,7 +101,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerGetsTaskById() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");
@@ -122,7 +116,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerUpdatesTaskById() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
 
@@ -137,7 +130,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerUpdatesSubtaskReferenceToEpicById() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic1 = new Epic("Эпик 1", "Эпик 1");
         taskManager.createTask(epic1);
 
@@ -156,7 +148,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerUpdatesEpicById() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -168,7 +159,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerUpdatesEpicSubtaskListAndCalcsStatus() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -187,7 +177,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerClearsTasksByTypes() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         taskManager.removeTasksByType(TaskType.TASK);
@@ -209,7 +198,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerDeletesTaskById() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         taskManager.deleteTaskById(task.getId());
@@ -218,7 +206,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerDeletesEpicAndItsSubtasksById() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -232,7 +219,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerDeletesSubtaskAndFromEpicById() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -249,7 +235,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerReturnsEpicSubtasksById() {
-        TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Эпик");
         taskManager.createTask(epic);
 
@@ -263,7 +248,6 @@ public class TaskManagerTest {
 
     @Test
     void taskManagerReturnsAddsTaskHistory() {
-        TaskManager taskManager = Managers.getDefault();
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");
@@ -285,8 +269,7 @@ public class TaskManagerTest {
     }
 
     @Test
-    void TasksInTaskManagerProtectedFromOuterChanges(){
-        TaskManager taskManager = Managers.getDefault();
+    void tasksInTaskManagerProtectedFromOuterChanges() {
         Task task = new Task("Задача", "Задача");
         taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Эпик");

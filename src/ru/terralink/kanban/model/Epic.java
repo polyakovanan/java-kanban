@@ -81,7 +81,7 @@ public class Epic extends Task {
 
     @Override
     public void setStatus(TaskStatus status) {
-        throw new UnsupportedOperationException("Невозможно явно установить статус эпика, так как это расчетное значение");
+        this.status = status;
     }
 
     @Override
