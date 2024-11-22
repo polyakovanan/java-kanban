@@ -1,6 +1,9 @@
 package ru.terralink.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 /* Базовая реализация задачи. Такая не является абстрактной и экземпляр создать можно.
 * Но при этому у нее не будет ни потомков, ни родителей с точки зрения бизнес логики.
@@ -13,6 +16,8 @@ public class Task implements Cloneable {
     protected String name;
     protected String description;
     protected TaskStatus status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
     public Task(String name, String description) {
         this.name = name;
@@ -91,5 +96,29 @@ public class Task implements Cloneable {
 
     public TaskType getType() {
         return TaskType.TASK;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
+
+        return startTime.plus(duration);
     }
 }

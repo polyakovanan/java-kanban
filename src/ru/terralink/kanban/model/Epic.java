@@ -1,7 +1,12 @@
 package ru.terralink.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /* Добавляем эпику ссылку на список его подзадач. Сохраним их в хэш-мапе,
 * аналагично тому, как все задачи хранит TaskManager для того, чтобы унифицировать то,
@@ -10,7 +15,7 @@ import java.util.Map;
 
 public class Epic extends Task {
     private final Map<Integer, Subtask> subtasks;
-
+    private LocalDateTime endTime;
     public Epic(String name, String description) {
         super(name, description);
         subtasks = new HashMap<>();
@@ -28,16 +33,19 @@ public class Epic extends Task {
     public void addSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
         calcStatus();
+        calcDates();
     }
 
     public void removeSubtask(int id) {
         subtasks.remove(id);
         calcStatus();
+        calcDates();
     }
 
     public void clearSubtasks() {
         subtasks.clear();
         calcStatus();
+        calcDates();
     }
 
     private void calcStatus() {
@@ -70,6 +78,24 @@ public class Epic extends Task {
         }
     }
 
+    private void calcDates() {
+        Optional<LocalDateTime> opStartTime = subtasks.values().stream()
+                .map(subtask -> subtask.getStartTime())
+                .min(Comparator.naturalOrder());
+
+        this.startTime = opStartTime.isPresent() ? opStartTime.get() : null;
+
+        Optional<LocalDateTime> opEndTime = subtasks.values().stream()
+                .map(subtask -> subtask.getEndTime())
+                .max(Comparator.naturalOrder());
+
+        this.endTime = opEndTime.isPresent() ? opEndTime.get() : null;
+
+        this.duration = subtasks.values().stream()
+                .map(subtask -> subtask.getDuration())
+                .reduce(Duration.ZERO, Duration::plus);
+    }
+
     @Override
     public Object clone() {
         Epic epic = new Epic(this.id, this.name, this.description);
@@ -82,6 +108,25 @@ public class Epic extends Task {
     @Override
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void calcEndTime(){
+        if (this.startTime != null && this.duration != null) {
+            endTime = startTime.plus(duration);
+        } else {
+            endTime = null;
+        }
     }
 
     @Override
