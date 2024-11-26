@@ -32,4 +32,8 @@ public interface TaskManager {
     List<Subtask> getSubtasksByEpic(int id);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
+
+    boolean validateTaskDeadlines(Task task);
 }

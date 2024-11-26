@@ -1,17 +1,14 @@
 package ru.terralink.kanban.model;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum TaskType {
     TASK,
     EPIC,
-    SUBTASK,
-    OPTIONAL;
+    SUBTASK;
 
-    public static TaskType parseTaskType(String type) {
-        for (TaskType taskType : values()) {
-            if (type.equals(taskType.toString())) {
-                return taskType;
-            }
-        }
-        return OPTIONAL;
+    public static Optional<TaskType> parseTaskType(String type) {
+        return Arrays.stream(values()).filter(taskType -> type.equals(taskType.toString())).findAny();
     }
 }

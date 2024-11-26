@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File saveFile;
@@ -73,12 +74,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public boolean deleteTaskById(int id) {
-        for (TaskType type : TaskType.values()) {
-            if (deleteTaskByIdAndType(id, type))
-                return true;
-        }
-
-        return false;
+        return Arrays.stream(TaskType.values())
+                .filter(type -> deleteTaskByIdAndType(id, type))
+                .findFirst()
+                .isPresent();
     }
 
     public void addParsedTask(Task task) {
@@ -99,21 +98,28 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (FileWriter fileWriter = new FileWriter(this.saveFile, StandardCharsets.UTF_8)) {
             fileWriter.write(TaskUtils.TEXT_FILE_HEADER);
             fileWriter.write(System.lineSeparator());
-            for (Task task : this.taskStorage.get(TaskType.TASK).values()) {
-                fileWriter.write(TaskUtils.toString(task));
-                fileWriter.write(System.lineSeparator());
-            }
+
+            this.taskStorage.get(TaskType.TASK).values().stream()
+                    .forEach(task -> writeTaskToFile(fileWriter, task));
+
             //эпики обязательно должны быть записаны до подзадач, иначе потом будут проблемы с чтением
-            for (Task task : this.taskStorage.get(TaskType.EPIC).values()) {
-                fileWriter.write(TaskUtils.toString(task));
-                fileWriter.write(System.lineSeparator());
-            }
-            for (Task task : this.taskStorage.get(TaskType.SUBTASK).values()) {
-                fileWriter.write(TaskUtils.toString(task));
-                fileWriter.write(System.lineSeparator());
-            }
-        } catch (IOException e) {
+            this.taskStorage.get(TaskType.EPIC).values().stream()
+                    .forEach(task -> writeTaskToFile(fileWriter, task));
+
+            this.taskStorage.get(TaskType.SUBTASK).values().stream()
+                    .forEach(task -> writeTaskToFile(fileWriter, task));
+
+        } catch (IOException | RuntimeException e) {
             throw new ManagerSaveException("Не удалось сохранить в файл: " + e.getMessage());
+        }
+    }
+
+    private void writeTaskToFile(FileWriter writer, Task task){
+        try {
+            writer.write(TaskUtils.toString(task));
+            writer.write(System.lineSeparator());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

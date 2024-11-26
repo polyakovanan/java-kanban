@@ -39,6 +39,8 @@ public class Task implements Cloneable {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", duration=" + duration == null ? "" : duration.toMinutes() +
+                ", startTime=" + startTime == null ? "" : startTime.toString() +
                 '}';
     }
 
@@ -115,10 +117,19 @@ public class Task implements Cloneable {
     }
 
     public LocalDateTime getEndTime() {
-        if (startTime == null || duration == null) {
+        if (startTime == null) {
             return null;
+        } else if (duration == null) {
+            return startTime;
         }
 
         return startTime.plus(duration);
+    }
+
+    public boolean checkTimeIntersections(Task task){
+        return (this.getEndTime().compareTo(task.getStartTime()) > 0
+                && this.getEndTime().compareTo(task.getEndTime()) < 0)
+                || (this.getStartTime().compareTo(task.getEndTime()) > 0
+                && this.getStartTime().compareTo(task.getStartTime()) < 0);
     }
 }

@@ -7,18 +7,22 @@ import ru.terralink.kanban.model.TaskType;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
 
     protected int idCounter = 0; //id задачи уникален между всеми существующими задачами независимо от типа
     protected final Map<TaskType, Map<Integer, Task>> taskStorage;
     protected final HistoryManager historyManager;
+    protected final TreeSet<Task> prioritizedTasks;
 
     public InMemoryTaskManager() {
         taskStorage = new HashMap<>();
-        for (TaskType type : TaskType.values())
-            taskStorage.put(type, new HashMap<>());
+        Arrays.stream(TaskType.values())
+                .forEach(type -> taskStorage.put(type, new HashMap<>()));
+
        historyManager = Managers.getDefaultHistory();
+       prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
     }
 
     //Вернем список с целевым типом задачи
@@ -41,10 +45,9 @@ public class InMemoryTaskManager implements TaskManager {
             taskStorage.get(TaskType.SUBTASK).clear();
         } else if (type == TaskType.SUBTASK) {
             //Если очистили все подзадачи, то все эпики тоже опустели. Очистим в них ссылки на подзадачи
-            for (Task task : taskStorage.get(TaskType.EPIC).values()) {
-                Epic epic = (Epic)task;
-                epic.clearSubtasks();
-            }
+            taskStorage.get(TaskType.EPIC).values().stream()
+                    .map(epic -> (Epic) epic)
+                    .forEach(Epic::clearSubtasks);
         }
 
         tasks.clear();
@@ -70,12 +73,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        for (TaskType type : TaskType.values()) {
-            Task task = getTaskByIdAndType(id, type);
-            if (task != null) {
-                return (Task) task.clone();
-            }
+        Optional<Task> taskOptional = Arrays.stream(TaskType.values())
+                .map(type -> getTaskByIdAndType(id, type))
+                .filter(task -> task != null)
+                .findAny();
+
+        if (taskOptional.isPresent()) {
+            return (Task) taskOptional.get().clone();
         }
+
         return null;
     }
 
@@ -99,7 +105,14 @@ public class InMemoryTaskManager implements TaskManager {
             }
             case TASK -> {
                 task.setId(++idCounter);
-                tasks.put(task.getId(), (Task) task.clone());
+                Task clone = (Task) task.clone();
+                tasks.put(task.getId(), clone);
+                if (!validateTaskDeadlines(clone)) {
+                    return -1;
+                }
+                if (clone.getStartTime() != null) {
+                    prioritizedTasks.add(clone);
+                }
                 return idCounter;
             }
             case SUBTASK -> {
@@ -112,8 +125,16 @@ public class InMemoryTaskManager implements TaskManager {
                 }
 
                 subtask.setId(++idCounter);
-                tasks.put(subtask.getId(), (Subtask) subtask.clone());
-                targetEpic.addSubtask((Subtask) subtask.clone());
+                Subtask clone = (Subtask) subtask.clone();
+                tasks.put(subtask.getId(), clone);
+                if (!validateTaskDeadlines(clone)) {
+                    return -1;
+                }
+
+                if (clone.getStartTime() != null) {
+                    prioritizedTasks.add(clone);
+                }
+                targetEpic.addSubtask(clone);
                 return idCounter;
             }
         }
@@ -147,7 +168,14 @@ public class InMemoryTaskManager implements TaskManager {
             }
             case TASK -> {
                 if (tasks.containsKey(id)) {
-                    tasks.put(id, (Task) task.clone());
+                    Task clone = (Task) task.clone();
+                    tasks.put(id, clone);
+                    if (!validateTaskDeadlines(clone)) {
+                        return false;
+                    }
+                    if (clone.getStartTime() != null) {
+                        prioritizedTasks.add(clone);
+                    }
                     return true;
                 }
             }
@@ -157,14 +185,20 @@ public class InMemoryTaskManager implements TaskManager {
                     //и если сменилась, то удаляем ее из старого эпика и добавляем в новый
                     //всегда передобавляем новую подзадачу, чтобы стриггерить пересчет статуса эпика
                     Subtask originalSubtask = (Subtask) tasks.get(id);
-                    Subtask newSubtask = (Subtask) task;
-                    Epic newEpic = (Epic)taskStorage.get(TaskType.EPIC).get(newSubtask.getEpicId());
-                    if (originalSubtask.getEpicId() != newSubtask.getEpicId()) {
+                    Subtask clone = (Subtask) task.clone();
+                    Epic newEpic = (Epic)taskStorage.get(TaskType.EPIC).get(clone.getEpicId());
+                    if (originalSubtask.getEpicId() != clone.getEpicId()) {
                         Epic originalEpic = (Epic)taskStorage.get(TaskType.EPIC).get(originalSubtask.getEpicId());
                         originalEpic.removeSubtask(originalSubtask.getId());
                     }
-                    newEpic.addSubtask((Subtask) newSubtask.clone());
-                    tasks.put(id, (Task) task.clone());
+                    newEpic.addSubtask(clone);
+                    tasks.put(id, clone);
+                    if (!validateTaskDeadlines(clone)) {
+                        return false;
+                    }
+                    if (clone.getStartTime() != null) {
+                        prioritizedTasks.add(clone);
+                    }
                     return true;
                 }
             }
@@ -194,17 +228,19 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.remove(id);
                     Map<Integer, Subtask> epicSubtasks = epic.getSubtasks();
                     Map<Integer, Task> subtasks = taskStorage.get(TaskType.SUBTASK);
-                    for (Integer subId : epicSubtasks.keySet()) {
-                        subtasks.remove(subId);
-                        historyManager.remove(subId);
-                    }
+
+                    epicSubtasks.keySet().stream()
+                            .forEach(subId -> {
+                                subtasks.remove(subId);
+                                historyManager.remove(subId);
+                            });
 
                     return true;
                 }
             }
             case TASK -> {
                 if (tasks.containsKey(id)) {
-                    tasks.remove(id);
+                    prioritizedTasks.remove(tasks.remove(id));
                     historyManager.remove(id);
                     return true;
                 }
@@ -213,6 +249,7 @@ public class InMemoryTaskManager implements TaskManager {
                 if (tasks.containsKey(id)) {
                     //если подзадачу удалили, надо убрать ссылку на нее из ее эпика
                     final Subtask subtask = (Subtask) tasks.remove(id);
+                    prioritizedTasks.remove(subtask);
                     Epic epic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                     epic.removeSubtask(id);
                     historyManager.remove(id);
@@ -227,12 +264,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean deleteTaskById(int id) {
-        for (TaskType type : TaskType.values()) {
-            if (deleteTaskByIdAndType(id, type))
-                return true;
-        }
-
-        return false;
+        return Arrays.stream(TaskType.values())
+                .filter(type -> deleteTaskByIdAndType(id, type))
+                .findAny()
+                .isPresent();
     }
 
     /*Если есть такой эпик - отдаем его список подзадач*/
@@ -250,5 +285,20 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return prioritizedTasks.stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean validateTaskDeadlines(Task task) {
+        if (task.getStartTime() == null) {
+            return true;
+        }
+
+        return prioritizedTasks.stream()
+                .anyMatch(prioritizedTask -> prioritizedTask.checkTimeIntersections(task));
     }
 }

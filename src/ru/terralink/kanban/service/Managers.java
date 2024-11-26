@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class Managers {
 
@@ -37,20 +39,21 @@ public class Managers {
         try {
             String fileContent = Files.readString(saveFile.toPath(), StandardCharsets.UTF_8);
             String[] lines = fileContent.split(System.lineSeparator());
-            for (int i = 0; i < lines.length; i++) {
-                if (i == 0) {
-                    if (!lines[i].equals(TaskUtils.TEXT_FILE_HEADER)) {
-                        throw new IllegalArgumentException(String.format("Неверный заголовок файла: " + lines[i]));
-                    }
-                } else {
-                    try {
-                        Task task = TaskUtils.fromString(lines[i]);
-                        fileBackedTaskManager.addParsedTask(task);
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException(String.format("Ошибка в строке '%s': %s", lines[i], e.getMessage()));
-                    }
-                }
+            if (lines.length > 0 && !lines[0].equals(TaskUtils.TEXT_FILE_HEADER)) {
+                throw new IllegalArgumentException(String.format("Неверный заголовок файла: " + lines[0]));
             }
+
+            Arrays.stream(lines)
+                    .filter(line -> !line.equals(TaskUtils.TEXT_FILE_HEADER))
+                    .forEach(line -> {
+                        try {
+                            Task task = TaskUtils.fromString(line);
+                            fileBackedTaskManager.addParsedTask(task);
+                            } catch (IllegalArgumentException e) {
+                                throw new IllegalArgumentException(String.format("Ошибка в строке '%s': %s", line, e.getMessage()));
+                            }
+                    });
+
             fileBackedTaskManager.save();
         } catch (IOException e) {
             throw new IOException("Ошибка чтения файла: " + e.getMessage());
@@ -58,4 +61,5 @@ public class Managers {
 
         return fileBackedTaskManager;
     }
+
 }

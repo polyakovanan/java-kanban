@@ -1,3 +1,3 @@
-id,type,name,status,description,epic
-2,EPIC,Эпик,NEW,Эпик,
-3,SUBTASK,Подзадача,NEW,Подзадача,2
+id,type,name,status,description,epic,startTime,duration,endTime
+2,EPIC,Эпик,NEW,Эпик,,,
+3,SUBTASK,Подзадача,NEW,Подзадача,2,,
