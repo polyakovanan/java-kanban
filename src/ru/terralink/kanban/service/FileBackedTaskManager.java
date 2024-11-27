@@ -114,7 +114,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void writeTaskToFile(FileWriter writer, Task task){
+    private void writeTaskToFile(FileWriter writer, Task task) {
         try {
             writer.write(TaskUtils.toString(task));
             writer.write(System.lineSeparator());
