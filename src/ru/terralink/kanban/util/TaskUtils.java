@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ru.terralink.kanban.model.TaskType.*;
 
@@ -15,6 +14,7 @@ public class TaskUtils {
     public static final String TEXT_FILE_HEADER = "id,type,name,status,description,epic,startTime,duration,endTime";
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     public static final int SECONDS_IN_MINUTE = 60;
+
     private TaskUtils() {
 
     }
