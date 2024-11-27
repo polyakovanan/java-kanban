@@ -20,16 +20,17 @@ public class TaskUtils {
     }
 
     public static String toString(Task task) {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", task.getId(), task.getType(), task.getName(), task.getStatus(),
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s", task.getId(), task.getType(), task.getName(), task.getStatus(),
                 task.getDescription(), task.getType() == SUBTASK ? ((Subtask)task).getEpicId() : "",
                 task.getStartTime() != null ? task.getStartTime().format(DATE_TIME_FORMATTER) : "",
-                task.getDuration() != null ? task.getDuration().getSeconds() / SECONDS_IN_MINUTE : "");
+                task.getDuration() != null ? task.getDuration().getSeconds() / SECONDS_IN_MINUTE : "",
+                task.getType() == EPIC && ((Epic)task).getEndTime() != null  ? ((Epic)task).getEndTime().format(DATE_TIME_FORMATTER) : "");
     }
 
     public static Task fromString(String value) throws IllegalArgumentException {
 
         String[] elements = value.split(",", -1);
-        if (elements.length != 8) {
+        if (elements.length != 9) {
             throw new IllegalArgumentException("Количество элементов в строке не соответствует модели данных");
         }
 
@@ -81,6 +82,15 @@ public class TaskUtils {
             }
         }
 
+        LocalDateTime endTime = null;
+        if (!elements[8].isBlank()) {
+            try {
+                endTime = LocalDateTime.parse(elements[8], DATE_TIME_FORMATTER);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Не удалось прочитать дату конца объекта");
+            }
+        }
+
         Task parsedObject = null;
         switch (type.get()) {
             case TASK -> {
@@ -91,6 +101,7 @@ public class TaskUtils {
             }
             case EPIC -> {
                 parsedObject = new Epic(id, name, description);
+                ((Epic)parsedObject).setEndTime(endTime);
             }
         }
 

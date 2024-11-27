@@ -1,6 +1,7 @@
 package ru.terralink.kanban.model;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,8 +40,8 @@ public class Task implements Cloneable {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", duration=" + duration == null ? "" : duration.toMinutes() +
-                ", startTime=" + startTime == null ? "" : startTime.toString() +
+                ", duration=" + (duration == null ? "" : duration.toMinutes()) +
+                ", startTime=" + (startTime == null ? "" : startTime.toString()) +
                 '}';
     }
 
@@ -61,6 +62,8 @@ public class Task implements Cloneable {
     public Object clone() {
         Task task = new Task(this.id, this.name, this.description);
         task.setStatus(this.status);
+        task.setStartTime(this.getStartTime());
+        task.setDuration(this.getDuration());
         return task;
     }
 
@@ -127,9 +130,10 @@ public class Task implements Cloneable {
     }
 
     public boolean checkTimeIntersections(Task task){
-        return (this.getEndTime().compareTo(task.getStartTime()) > 0
-                && this.getEndTime().compareTo(task.getEndTime()) < 0)
-                || (this.getStartTime().compareTo(task.getEndTime()) > 0
-                && this.getStartTime().compareTo(task.getStartTime()) < 0);
+        if (this.getStartTime() == null || task.getStartTime() == null) {
+            return false;
+        }
+        return (this.getEndTime().isAfter(task.getStartTime()) && this.getEndTime().isBefore(task.getEndTime()))
+                || (task.getStartTime().isAfter(this.getStartTime()) && task.getStartTime().isBefore(this.getEndTime()));
     }
 }

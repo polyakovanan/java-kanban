@@ -31,6 +31,8 @@ public class Subtask extends Task {
     public Object clone() {
         Subtask subtask = new Subtask(this.id, this.name, this.description, this.epicId);
         subtask.setStatus(this.getStatus());
+        subtask.setStartTime(this.getStartTime());
+        subtask.setDuration(this.getDuration());
         return subtask;
     }
 
@@ -41,8 +43,8 @@ public class Subtask extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", duration=" + duration == null ? "" : duration.toMinutes() +
-                ", startTime=" + startTime == null ? "" : startTime.toString() +
+                ", duration=" + (duration == null ? "" : duration.toMinutes()) +
+                ", startTime=" + (startTime == null ? "" : startTime.toString()) +
                 ", epicId=" + epicId +
                 '}';
     }

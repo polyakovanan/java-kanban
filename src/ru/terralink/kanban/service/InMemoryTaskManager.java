@@ -231,7 +231,7 @@ public class InMemoryTaskManager implements TaskManager {
 
                     epicSubtasks.keySet().stream()
                             .forEach(subId -> {
-                                subtasks.remove(subId);
+                                prioritizedTasks.remove(subtasks.remove(subId));
                                 historyManager.remove(subId);
                             });
 
@@ -294,11 +294,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean validateTaskDeadlines(Task task) {
-        if (task.getStartTime() == null) {
+        if (task.getStartTime() == null || prioritizedTasks.isEmpty()) {
             return true;
         }
 
-        return prioritizedTasks.stream()
+        return !prioritizedTasks.stream()
                 .anyMatch(prioritizedTask -> prioritizedTask.checkTimeIntersections(task));
     }
 }

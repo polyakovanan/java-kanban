@@ -95,8 +95,6 @@ public class Epic extends Task {
                 .reduce(Duration.ZERO, Duration::plus);
 
         this.duration = calcDuration.toMinutes() == 0 ? null : calcDuration;
-
-        calcEndTime();
     }
 
     @Override
@@ -119,21 +117,13 @@ public class Epic extends Task {
 
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public LocalDateTime getEndTime() {
         return endTime;
-    }
-
-    public void calcEndTime(){
-        if (this.startTime != null) {
-            if (this.duration != null) {
-                endTime = startTime.plus(duration);
-            } else {
-                endTime = startTime;
-            }
-        } else {
-            endTime = null;
-        }
     }
 
     @Override
@@ -143,9 +133,9 @@ public class Epic extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", duration=" + duration == null ? "" : duration.toMinutes() +
-                ", startTime=" + startTime == null ? "" : startTime.toString() +
-                ", endTime=" + endTime == null ? "" : endTime.toString() +
+                ", duration=" + (duration == null ? "" : duration.toMinutes()) +
+                ", startTime=" + (startTime == null ? "" : startTime.toString()) +
+                ", endTime=" + (endTime == null ? "" : endTime.toString()) +
                 ", subtasks=" + subtasks +
                 '}';
     }

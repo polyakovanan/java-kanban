@@ -2,6 +2,9 @@ package ru.terralink.kanban.model;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class EpicTest {
@@ -73,5 +76,68 @@ public class EpicTest {
             Assertions.assertEquals(subtasks1.get(id), subtasks2.get(id), "Клон подзадачи эпика не равняется оригиналу");
             Assertions.assertNotSame(subtasks1.get(id), subtasks2.get(id), "Клон подзадачи эпика ссылается на оригинал");
         }
+    }
+
+    @Test
+    void EpicCalculatesDatesProperly() {
+        Epic epic = new Epic(1, "Эпик 1", "Эпик 1");
+
+        Subtask subtask1 = new Subtask(2, "Подзадача 1", "Подзадача 1", epic);
+        Subtask subtask2 = new Subtask(3, "Подзадача 2", "Подзадача 2", epic);
+
+        epic.addSubtask(subtask1);
+        epic.addSubtask(subtask2);
+        Assertions.assertNull(epic.getStartTime(), "Эпик с новыми подзадачами без времени начала имеет время начала");
+        Assertions.assertNull(epic.getDuration(), "Эпик с новыми подзадачами без продолжительности имеет продолжительность");
+        Assertions.assertNull(epic.getEndTime(), "Эпик с новыми подзадачами без времени конца имеет время конца");
+
+        subtask1.setStartTime(LocalDateTime.of(2024, 1, 1,0,0));
+
+        epic = new Epic(1, "Эпик 1", "Эпик 1");
+        epic.addSubtask(subtask1);
+        Assertions.assertEquals(LocalDateTime.of(2024, 1, 1,0,0), epic.getStartTime(), "Эпик не высчитал время начала по подзадаче");
+        Assertions.assertNull(epic.getDuration(),  "Эпик с подзадачами без продолжительности имеет продолжительность");
+
+        subtask1.setDuration(Duration.ofMinutes(60));
+        epic = new Epic(1, "Эпик 1", "Эпик 1");
+        epic.addSubtask(subtask1);
+        Assertions.assertEquals(LocalDateTime.of(2024, 1, 1,0,0), epic.getStartTime(), "Эпик неправильно высчитал время начала по подзадаче");
+        Assertions.assertEquals(Duration.ofMinutes(60), epic.getDuration(),  "Эпик неправильно посчитал свою продолжительность по подзадаче");
+        Assertions.assertEquals(LocalDateTime.of(2024, 1, 1,1,0), epic.getEndTime(),  "Эпик неправильно посчитал время конца по подзадаче");
+
+        epic = new Epic(1, "Эпик 1", "Эпик 1");
+        subtask2.setStartTime(LocalDateTime.of(2024, 1, 2,0,0));
+        subtask2.setDuration(Duration.ofMinutes(60));
+        epic.addSubtask(subtask1);
+        epic.addSubtask(subtask2);
+        Assertions.assertEquals(LocalDateTime.of(2024, 1, 1,0,0), epic.getStartTime(), "Эпик неправильно высчитал время начала по нескольким подзадачам");
+        Assertions.assertEquals(Duration.ofMinutes(120), epic.getDuration(),  "Эпик неправильно посчитал свою продолжительность по нескольким подзадачам");
+        Assertions.assertEquals(LocalDateTime.of(2024, 1, 2,1,0), epic.getEndTime(),  "Эпик неправильно посчитал время конца по нескольким подзадачам");
+
+    }
+
+    @Test
+    void EpicChecksIntersectionsCorrectly(){
+        Epic epic1 = new Epic(1,"Эпик 1", "Эпик 1");
+        Subtask subtask1 = new Subtask(1, "Подзадача 1", "Подзадача 1", 1);
+        subtask1.setStartTime(LocalDateTime.of(2024, 1, 1,0,0));
+        subtask1.setDuration(Duration.ofMinutes(120));
+        epic1.addSubtask(subtask1);
+
+        Epic epic2 = new Epic(1,"Эпик 2", "Эпик 2");
+        Subtask subtask2 = new Subtask(2, "Подзадача 2", "Подзадача 2", 2);
+        subtask2.setStartTime(LocalDateTime.of(2024, 1, 1,2,0));
+        subtask2.setDuration(Duration.ofMinutes(120));
+        epic2.addSubtask(subtask2);
+
+        Assertions.assertFalse(epic1.checkTimeIntersections(epic2), "Эпик неправильно определил непересекающиеся интервалы");
+
+        Epic epic3 = new Epic(1,"Эпик 3", "Эпик 3");
+        Subtask subtask3 = new Subtask(3, "Подзадача 3", "Подзадача 3", 3);
+        subtask3.setStartTime(LocalDateTime.of(2024, 1, 1,1,0));
+        subtask3.setDuration(Duration.ofMinutes(120));
+        epic3.addSubtask(subtask3);
+
+        Assertions.assertTrue(epic1.checkTimeIntersections(epic3), "Эпик неправильно определил пересекающиеся интервалы");
     }
 }
