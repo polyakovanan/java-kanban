@@ -1,10 +1,8 @@
 package ru.terralink.kanban.model;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 /* Базовая реализация задачи. Такая не является абстрактной и экземпляр создать можно.
 * Но при этому у нее не будет ни потомков, ни родителей с точки зрения бизнес логики.
@@ -129,7 +127,7 @@ public class Task implements Cloneable {
         return startTime.plus(duration);
     }
 
-    public boolean checkTimeIntersections(Task task){
+    public boolean checkTimeIntersections(Task task) {
         if (this.getStartTime() == null || task.getStartTime() == null) {
             return false;
         }
