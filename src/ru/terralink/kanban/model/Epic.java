@@ -32,23 +32,23 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
-        calcStatus();
-        calcDates();
+        calculateStatus();
+        calculateDates();
     }
 
     public void removeSubtask(int id) {
         subtasks.remove(id);
-        calcStatus();
-        calcDates();
+        calculateStatus();
+        calculateDates();
     }
 
     public void clearSubtasks() {
         subtasks.clear();
-        calcStatus();
-        calcDates();
+        calculateStatus();
+        calculateDates();
     }
 
-    private void calcStatus() {
+    private void calculateStatus() {
         int subtaskCount = subtasks.keySet().size();
         if (subtaskCount == 0) {
             this.status = TaskStatus.NEW;
@@ -75,7 +75,7 @@ public class Epic extends Task {
         }
     }
 
-    private void calcDates() {
+    private void calculateDates() {
         Optional<LocalDateTime> opStartTime = subtasks.values().stream()
                 .filter(subtask -> subtask.getStartTime() != null)
                 .map(subtask -> subtask.getStartTime())
