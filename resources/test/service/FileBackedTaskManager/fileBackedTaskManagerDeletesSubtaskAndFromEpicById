@@ -1,2 +1,2 @@
-id,type,name,status,description,epic
-1,EPIC,Эпик,NEW,Эпик,
+id,type,name,status,description,epic,startTime,duration,endTime
+1,EPIC,Эпик,NEW,Эпик,,,,

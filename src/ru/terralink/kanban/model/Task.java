@@ -1,5 +1,7 @@
 package ru.terralink.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /* Базовая реализация задачи. Такая не является абстрактной и экземпляр создать можно.
@@ -13,6 +15,8 @@ public class Task implements Cloneable {
     protected String name;
     protected String description;
     protected TaskStatus status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
     public Task(String name, String description) {
         this.name = name;
@@ -34,6 +38,8 @@ public class Task implements Cloneable {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", duration=" + (duration == null ? "" : duration.toMinutes()) +
+                ", startTime=" + (startTime == null ? "" : startTime.toString()) +
                 '}';
     }
 
@@ -54,6 +60,8 @@ public class Task implements Cloneable {
     public Object clone() {
         Task task = new Task(this.id, this.name, this.description);
         task.setStatus(this.status);
+        task.setStartTime(this.getStartTime());
+        task.setDuration(this.getDuration());
         return task;
     }
 
@@ -91,5 +99,39 @@ public class Task implements Cloneable {
 
     public TaskType getType() {
         return TaskType.TASK;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null;
+        } else if (duration == null) {
+            return startTime;
+        }
+
+        return startTime.plus(duration);
+    }
+
+    public boolean checkTimeIntersections(Task task) {
+        if (this.getStartTime() == null || task.getStartTime() == null) {
+            return false;
+        }
+        return (this.getEndTime().isAfter(task.getStartTime()) && this.getEndTime().isBefore(task.getEndTime()))
+                || (task.getStartTime().isAfter(this.getStartTime()) && task.getStartTime().isBefore(this.getEndTime()));
     }
 }

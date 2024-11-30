@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTaskManagerTest extends TaskManagerTest {
@@ -186,5 +188,19 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
     void tasksInTaskManagerProtectedFromOuterChanges() {
         super.tasksInTaskManagerProtectedFromOuterChanges();
         saveFileContentCheck = "tasksInFileBackedTaskManagerProtectedFromOuterChanges";
+    }
+
+    @Override
+    @Test
+    void taskManagerReturnsTasksSortedByPriority(){
+        super.taskManagerReturnsTasksSortedByPriority();
+        saveFileContentCheck = "taskManagerReturnsTasksSortedByPriority";
+    }
+
+    @Override
+    @Test
+    void taskManagerRefusesIntersectingTasks() {
+        super.taskManagerRefusesIntersectingTasks();
+        saveFileContentCheck = "taskManagerRefusesIntersectingTasks";
     }
 }

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.terralink.kanban.model.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public abstract class TaskManagerTest {
@@ -305,4 +307,78 @@ public abstract class TaskManagerTest {
         Assertions.assertEquals("Подзадача", subtaskInManager2.getName(), "Подзадача в менеджере изменена извне");
 
     }
+
+    @Test
+    void taskManagerReturnsTasksSortedByPriority(){
+        Task task1 = new Task("Задача 1", "Задача 1");
+        task1.setStartTime(LocalDateTime.of(2024, 1, 1,0,0));
+        task1.setDuration(Duration.ofMinutes(120));
+        taskManager.createTask(task1);
+
+        Task task2 = new Task("Задача 2", "Задача 2");
+        task2.setStartTime(LocalDateTime.of(2024, 1, 10,0,0));
+        task2.setDuration(Duration.ofMinutes(120));
+
+        taskManager.createTask(task2);
+        Task task3 = new Task("Задача 3", "Задача 3");
+        taskManager.createTask(task3);
+
+        Epic epic = new Epic("Эпик", "Эпик");
+
+        taskManager.createTask(epic);
+
+        Subtask subtask1 = new Subtask( "Подзадача 1", "Подзадача 1", epic);
+        subtask1.setStartTime(LocalDateTime.of(2024, 1, 3,0,0));
+        subtask1.setDuration(Duration.ofMinutes(120));
+        taskManager.createTask(subtask1);
+
+        Subtask subtask2 = new Subtask( "Подзадача 2", "Подзадача 2", epic);
+        subtask2.setStartTime(LocalDateTime.of(2024, 1, 7,0,0));
+        subtask2.setDuration(Duration.ofMinutes(120));
+        taskManager.createTask(subtask2);
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        Assertions.assertEquals(4, prioritizedTasks.size(), "Менеджер задач неправильно определяет необходимость добавлять задачи в приоритет");
+        Assertions.assertEquals(1, prioritizedTasks.get(0).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(5, prioritizedTasks.get(1).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(6, prioritizedTasks.get(2).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(2, prioritizedTasks.get(3).getId(), "Менеджер задач неверно определил приоритет задач");
+
+        taskManager.deleteTaskById(4);
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        Assertions.assertEquals(2, prioritizedTasks.size(), "Менеджер задач не удаляет удаленные задачи из списка приоритета");
+        Assertions.assertEquals(1, prioritizedTasks.get(0).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(2, prioritizedTasks.get(1).getId(), "Менеджер задач неверно определил приоритет задач");
+
+        task3.setStartTime(LocalDateTime.of(2024, 1, 2,0,0));
+        task3.setDuration(Duration.ofMinutes(120));
+
+        taskManager.updateTaskById(task3, 3);
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        Assertions.assertEquals(3, prioritizedTasks.size(), "Менеджер задач не добавляет обновленные задачи из список приоритета");
+        Assertions.assertEquals(1, prioritizedTasks.get(0).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(3, prioritizedTasks.get(1).getId(), "Менеджер задач неверно определил приоритет задач");
+        Assertions.assertEquals(2, prioritizedTasks.get(2).getId(), "Менеджер задач неверно определил приоритет задач");
+    }
+
+    @Test
+    void taskManagerRefusesIntersectingTasks() {
+        Task task1 = new Task("Задача 1", "Задача 1");
+        task1.setStartTime(LocalDateTime.of(2024, 1, 1,0,0));
+        task1.setDuration(Duration.ofMinutes(120));
+        taskManager.createTask(task1);
+
+        Epic epic = new Epic("Эпик", "Эпик");
+        taskManager.createTask(epic);
+        Subtask subtask1 = new Subtask(1,"Подзадача 1", "Подзадача 1", 2);
+        subtask1.setStartTime(LocalDateTime.of(2024, 2, 3,0,0));
+        subtask1.setDuration(Duration.ofMinutes(120));
+        taskManager.createTask(subtask1);
+
+        Task task2 = new Task("Задача 2", "Задача 2");
+        task2.setStartTime(LocalDateTime.of(2024, 1, 1,1,0));
+        task2.setDuration(Duration.ofMinutes(120));
+        Assertions.assertEquals(-1, taskManager.createTask(task2), "Менеджер задач позволяет добавить пересекающиеся задачи");
+    }
+
 }
