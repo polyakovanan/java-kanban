@@ -131,7 +131,8 @@ public class Task implements Cloneable {
         if (this.getStartTime() == null || task.getStartTime() == null) {
             return false;
         }
-        return (this.getEndTime().isAfter(task.getStartTime()) && this.getEndTime().isBefore(task.getEndTime()))
-                || (task.getStartTime().isAfter(this.getStartTime()) && task.getStartTime().isBefore(this.getEndTime()));
+        return this.getStartTime().isEqual(task.getStartTime()) ||
+                (task.getStartTime().isAfter(this.getStartTime()) && task.getStartTime().isBefore(this.getEndTime())) ||
+                (this.getStartTime().isAfter(task.getStartTime()) && this.getStartTime().isBefore(task.getEndTime()));
     }
 }
