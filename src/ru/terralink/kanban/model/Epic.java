@@ -101,9 +101,11 @@ public class Epic extends Task {
     @Override
     public Object clone() {
         Epic epic = new Epic(this.id, this.name, this.description);
-        this.subtasks.values().stream()
-                .map(subtask -> subtask.clone())
-                .forEach(subtask -> epic.addSubtask((Subtask)subtask));
+        if (subtasks != null) {
+            this.subtasks.values().stream()
+                    .map(subtask -> subtask.clone())
+                    .forEach(subtask -> epic.addSubtask((Subtask) subtask));
+        }
         return epic;
     }
 

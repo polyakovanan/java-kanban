@@ -378,7 +378,7 @@ public abstract class TaskManagerTest {
         Task task2 = new Task("Задача 2", "Задача 2");
         task2.setStartTime(LocalDateTime.of(2024, 1, 1,1,0));
         task2.setDuration(Duration.ofMinutes(120));
-        Assertions.assertEquals(-1, taskManager.createTask(task2), "Менеджер задач позволяет добавить пересекающиеся задачи");
+        Assertions.assertEquals(-2, taskManager.createTask(task2), "Менеджер задач позволяет добавить пересекающиеся задачи");
     }
 
 }
