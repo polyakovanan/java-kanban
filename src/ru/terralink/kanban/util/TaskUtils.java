@@ -17,6 +17,7 @@ public class TaskUtils {
     public static final Map<TaskError, Integer> ERROR_CODES = Map.of(TaskError.UNKNOWN, -1,
                                                               TaskError.INTERSECT, -2,
                                                               TaskError.ABSENT_EPIC, -3);
+
     private TaskUtils() {
 
     }

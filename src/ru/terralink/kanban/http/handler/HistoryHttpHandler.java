@@ -11,7 +11,7 @@ import java.util.List;
 
 public class HistoryHttpHandler extends BaseHttpHandler {
 
-    public HistoryHttpHandler(TaskManager taskManager){
+    public HistoryHttpHandler(TaskManager taskManager) {
         super(taskManager);
         this.allowedMethods = List.of("GET");
     }

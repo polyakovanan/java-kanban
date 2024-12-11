@@ -32,7 +32,7 @@ public class HttpTaskServer {
         httpServer.start();
     }
 
-    public static void stop(){
+    public static void stop() {
         if (httpServer != null) {
             httpServer.stop(1);
         }

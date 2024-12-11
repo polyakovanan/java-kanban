@@ -11,9 +11,8 @@ import ru.terralink.kanban.service.TaskManager;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
-public class SubtaskHttpHandler extends TaskHttpHandler{
+public class SubtaskHttpHandler extends TaskHttpHandler {
     public SubtaskHttpHandler(TaskManager taskManager) {
         super(taskManager);
         this.entityType = TaskType.SUBTASK;

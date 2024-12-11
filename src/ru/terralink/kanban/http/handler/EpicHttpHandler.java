@@ -13,7 +13,6 @@ import ru.terralink.kanban.service.TaskManager;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 public class EpicHttpHandler extends TaskHttpHandler {
     public EpicHttpHandler(TaskManager taskManager) {

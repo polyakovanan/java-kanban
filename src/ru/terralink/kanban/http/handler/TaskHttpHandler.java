@@ -22,7 +22,7 @@ public class TaskHttpHandler extends BaseHttpHandler {
     String entityName;
     String locationPath;
 
-    public TaskHttpHandler(TaskManager taskManager){
+    public TaskHttpHandler(TaskManager taskManager) {
         super(taskManager);
         this.allowedMethods = List.of("GET", "POST", "DELETE");
         this.entityType = TaskType.TASK;

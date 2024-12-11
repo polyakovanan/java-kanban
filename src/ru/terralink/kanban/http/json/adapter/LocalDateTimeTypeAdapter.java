@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class LocalDateTimeTypeAdapter extends TypeAdapter<LocalDateTime> {
+
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
         jsonWriter.value(localDateTime == null ? null : localDateTime.format(TaskUtils.DATE_TIME_FORMATTER));

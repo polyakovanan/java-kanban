@@ -1,6 +1,5 @@
 package ru.terralink.kanban.http.handler;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
@@ -12,7 +11,7 @@ import java.util.List;
 
 public class PrioritizedHttpHandler extends BaseHttpHandler {
 
-    public PrioritizedHttpHandler(TaskManager taskManager){
+    public PrioritizedHttpHandler(TaskManager taskManager) {
         super(taskManager);
         this.allowedMethods = List.of("GET");
     }

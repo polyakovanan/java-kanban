@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public class TaskGson {
     private static Gson gson;
+
     private TaskGson() {
 
     }
