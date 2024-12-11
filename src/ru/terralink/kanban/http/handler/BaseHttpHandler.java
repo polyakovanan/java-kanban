@@ -16,7 +16,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
     protected final TaskManager taskManager;
     protected List<String> allowedMethods;
 
-    public BaseHttpHandler(TaskManager taskManager){
+    public BaseHttpHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
     }
 
