@@ -106,11 +106,11 @@ public class InMemoryTaskManager implements TaskManager {
                 return idCounter;
             }
             case TASK -> {
+                task.setId(++idCounter);
                 Task clone = (Task) task.clone();
                 if (!validateTaskDeadlines(clone)) {
                     return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                 }
-                clone.setId(++idCounter);
                 tasks.put(clone.getId(), clone);
                 if (clone.getStartTime() != null) {
                     prioritizedTasks.add(clone);
@@ -121,6 +121,7 @@ public class InMemoryTaskManager implements TaskManager {
                 //для подзадачи находим ее эпик и добавляем в него ссылку на нее
                 //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
                 Subtask subtask = (Subtask) task;
+                subtask.setId(++idCounter);
                 Epic targetEpic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                 if (targetEpic == null) {
                     return TaskUtils.ERROR_CODES.get(TaskError.ABSENT_EPIC);
@@ -130,7 +131,6 @@ public class InMemoryTaskManager implements TaskManager {
                 if (!validateTaskDeadlines(clone)) {
                     return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                 }
-                clone.setId(++idCounter);
                 tasks.put(clone.getId(), clone);
                 if (clone.getStartTime() != null) {
                     prioritizedTasks.add(clone);
@@ -170,6 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
             case TASK -> {
                 if (tasks.containsKey(id)) {
                     Task clone = (Task) task.clone();
+                    clone.setId(id);
                     tasks.put(id, clone);
                     if (!validateTaskDeadlines(clone)) {
                         return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
@@ -187,6 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
                     //всегда передобавляем новую подзадачу, чтобы стриггерить пересчет статуса эпика
                     Subtask originalSubtask = (Subtask) tasks.get(id);
                     Subtask clone = (Subtask) task.clone();
+                    clone.setId(id);
                     Epic newEpic = (Epic)taskStorage.get(TaskType.EPIC).get(clone.getEpicId());
                     if (originalSubtask.getEpicId() != clone.getEpicId()) {
                         Epic originalEpic = (Epic)taskStorage.get(TaskType.EPIC).get(originalSubtask.getEpicId());
@@ -259,7 +261,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         }
-        return 0;
+        return -1;
     }
 
     /*Если не отдали тип задачи - перебираем коллекции по существующим типам*/
@@ -301,6 +303,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         return !prioritizedTasks.stream()
+                .filter(otherTask -> otherTask.getId() != task.getId())
                 .anyMatch(prioritizedTask -> prioritizedTask.checkTimeIntersections(task));
     }
 }

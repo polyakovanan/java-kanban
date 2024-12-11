@@ -1,7 +1,10 @@
 package ru.terralink.kanban.http.handler;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
+import ru.terralink.kanban.http.json.adapter.TaskGson;
 import ru.terralink.kanban.service.TaskManager;
 
 import java.io.IOException;
@@ -16,12 +19,15 @@ public class PrioritizedHttpHandler extends BaseHttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestMethod().equals("GET")) {
-            List prioritizedTasks = this.taskManager.getPrioritizedTasks();
-            Gson gson = new Gson();
-            sendJSONSuccessResponse(exchange, gson.toJson(prioritizedTasks));
-        } else {
-            sendMethodNotAllowed(exchange, this.allowedMethods);
+        try {
+            if (exchange.getRequestMethod().equals("GET")) {
+                List prioritizedTasks = this.taskManager.getPrioritizedTasks();
+                sendJSONSuccessResponse(exchange, TaskGson.getGson().toJson(prioritizedTasks));
+            } else {
+                sendMethodNotAllowed(exchange, this.allowedMethods);
+            }
+        } catch (IllegalArgumentException | IOException | JsonSyntaxException | JsonIOException e) {
+            sendServerFailed(exchange);
         }
     }
 }

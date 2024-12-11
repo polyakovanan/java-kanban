@@ -10,18 +10,20 @@ import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
     private static HttpServer httpServer = null;
+    private static TaskManager taskManager = null;
+
     public static void main(String[] args) {
-        start();
+        start(Managers.getDefault());
     }
 
-    public static void start() {
+    public static void start(TaskManager manager) {
         try {
             httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        TaskManager manager = Managers.getDefault();
+        taskManager = manager;
         httpServer.createContext("/tasks", new TaskHttpHandler(manager));
         httpServer.createContext("/subtasks", new SubtaskHttpHandler(manager));
         httpServer.createContext("/epics", new EpicHttpHandler(manager));
@@ -32,7 +34,7 @@ public class HttpTaskServer {
 
     public static void stop(){
         if (httpServer != null) {
-            httpServer.stop(5);
+            httpServer.stop(1);
         }
     }
 

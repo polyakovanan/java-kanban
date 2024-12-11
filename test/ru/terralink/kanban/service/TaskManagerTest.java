@@ -83,7 +83,7 @@ public abstract class TaskManagerTest {
         Subtask subtask = new Subtask("Подзадача", "Подзадача", epic);
         int id = taskManager.createTask(subtask);
 
-        Assertions.assertEquals(-1, id, "Менеджер задач не вернул ошибку при создании подзадачи с несуществующим эпиком");
+        Assertions.assertEquals(-3, id, "Менеджер задач не вернул ошибку при создании подзадачи с несуществующим эпиком");
         Assertions.assertEquals(0, taskManager.getTasksByType(TaskType.SUBTASK).size(), "Менеджер задач создает подзадачу с несуществующим эпиком");
 
     }

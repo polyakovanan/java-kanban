@@ -1,5 +1,7 @@
 package ru.terralink.kanban.http.handler;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import ru.terralink.kanban.http.json.adapter.TaskGson;
 import ru.terralink.kanban.service.TaskManager;
@@ -16,11 +18,15 @@ public class HistoryHttpHandler extends BaseHttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestMethod().equals("GET")) {
-            List history = this.taskManager.getHistory();
-            sendJSONSuccessResponse(exchange, TaskGson.getGson().toJson(history));
-        } else {
-            sendMethodNotAllowed(exchange, this.allowedMethods);
+        try {
+            if (exchange.getRequestMethod().equals("GET")) {
+                List history = this.taskManager.getHistory();
+                sendJSONSuccessResponse(exchange, TaskGson.getGson().toJson(history));
+            } else {
+                sendMethodNotAllowed(exchange, this.allowedMethods);
+            }
+        } catch (IllegalArgumentException | IOException | JsonSyntaxException | JsonIOException e) {
+            sendServerFailed(exchange);
         }
     }
 }

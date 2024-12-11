@@ -98,7 +98,7 @@ public class TaskHttpHandler extends BaseHttpHandler {
 
     protected void processPost(HttpExchange exchange, Integer taskId, Task task) throws IOException {
         if (taskId != null) {
-            Task originalTask = this.taskManager.getTaskById(taskId);
+            Task originalTask = this.taskManager.getTaskByIdAndType(taskId, entityType);
             if (originalTask == null) {
                 sendNotFound(exchange, entityName + " с таким ID отсутствует");
             } else {

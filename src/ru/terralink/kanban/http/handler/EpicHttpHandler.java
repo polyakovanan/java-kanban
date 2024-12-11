@@ -1,5 +1,7 @@
 package ru.terralink.kanban.http.handler;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import ru.terralink.kanban.http.json.adapter.TaskGson;
 import ru.terralink.kanban.model.Epic;
@@ -23,49 +25,53 @@ public class EpicHttpHandler extends TaskHttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        URI uri = exchange.getRequestURI();
-        String path = uri.getPath();
-        String[] uriElements = path.split("/");
-        if (uriElements.length > 4) {
-            sendNotFound(exchange, "Не удалось найти ресурс");
-            return;
-        }
-
-        Integer taskId = null;
-        if (uriElements.length > 2) {
-            try {
-                taskId = Integer.parseInt(uriElements[2]);
-            } catch (NumberFormatException e) {
-                sendNotFound(exchange, "Неверный формат ID");
-                return;
-            }
-        }
-
-        boolean subtasks = false;
-        if (uriElements.length > 3) {
-            if (!uriElements[3].equals("subtasks")) {
+        try {
+            String method = exchange.getRequestMethod();
+            URI uri = exchange.getRequestURI();
+            String path = uri.getPath();
+            String[] uriElements = path.split("/");
+            if (uriElements.length > 4) {
                 sendNotFound(exchange, "Не удалось найти ресурс");
                 return;
-            } else {
-                subtasks = true;
             }
-        }
 
-        switch (method) {
-            case "GET" -> {
-                if (subtasks) {
-                    processSubtasks(exchange, taskId);
-                } else {
-                    processGet(exchange, taskId);
+            Integer taskId = null;
+            if (uriElements.length > 2) {
+                try {
+                    taskId = Integer.parseInt(uriElements[2]);
+                } catch (NumberFormatException e) {
+                    sendNotFound(exchange, "Неверный формат ID");
+                    return;
                 }
             }
-            case "POST" -> {
-                Task task = TaskGson.getGson().fromJson(new String(exchange.getRequestBody().readAllBytes()), Epic.class);
-                processPost(exchange, taskId, task);
+
+            boolean subtasks = false;
+            if (uriElements.length > 3) {
+                if (!uriElements[3].equals("subtasks")) {
+                    sendNotFound(exchange, "Не удалось найти ресурс");
+                    return;
+                } else {
+                    subtasks = true;
+                }
             }
-            case "DELETE" -> processDelete(exchange, taskId);
-            default -> sendMethodNotAllowed(exchange, this.allowedMethods);
+
+            switch (method) {
+                case "GET" -> {
+                    if (subtasks) {
+                        processSubtasks(exchange, taskId);
+                    } else {
+                        processGet(exchange, taskId);
+                    }
+                }
+                case "POST" -> {
+                    Task task = TaskGson.getGson().fromJson(new String(exchange.getRequestBody().readAllBytes()), Epic.class);
+                    processPost(exchange, taskId, task);
+                }
+                case "DELETE" -> processDelete(exchange, taskId);
+                default -> sendMethodNotAllowed(exchange, this.allowedMethods);
+            }
+        } catch (IllegalArgumentException | IOException | JsonSyntaxException | JsonIOException e) {
+            sendServerFailed(exchange);
         }
     }
 
