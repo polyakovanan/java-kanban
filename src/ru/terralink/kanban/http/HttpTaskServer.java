@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
-    private static HttpServer httpServer = null;
-    private static TaskManager taskManager = null;
+    private static HttpServer httpServer;
+    private static TaskManager taskManager;
 
     public static void main(String[] args) {
         start(Managers.getDefault());
@@ -24,11 +24,11 @@ public class HttpTaskServer {
         }
 
         taskManager = manager;
-        httpServer.createContext("/tasks", new TaskHttpHandler(manager));
-        httpServer.createContext("/subtasks", new SubtaskHttpHandler(manager));
-        httpServer.createContext("/epics", new EpicHttpHandler(manager));
-        httpServer.createContext("/history", new HistoryHttpHandler(manager));
-        httpServer.createContext("/prioritized", new PrioritizedHttpHandler(manager));
+        httpServer.createContext("/tasks", new TaskHttpHandler(taskManager));
+        httpServer.createContext("/subtasks", new SubtaskHttpHandler(taskManager));
+        httpServer.createContext("/epics", new EpicHttpHandler(taskManager));
+        httpServer.createContext("/history", new HistoryHttpHandler(taskManager));
+        httpServer.createContext("/prioritized", new PrioritizedHttpHandler(taskManager));
         httpServer.start();
     }
 
