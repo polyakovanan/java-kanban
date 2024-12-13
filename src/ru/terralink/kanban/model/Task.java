@@ -59,7 +59,7 @@ public class Task implements Cloneable {
     @Override
     public Object clone() {
         Task task = new Task(this.id, this.name, this.description);
-        task.setStatus(this.status);
+        task.setStatus(this.status == null ? TaskStatus.NEW : this.status);
         task.setStartTime(this.getStartTime());
         task.setDuration(this.getDuration());
         return task;

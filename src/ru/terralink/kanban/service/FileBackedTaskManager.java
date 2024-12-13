@@ -5,6 +5,7 @@ import ru.terralink.kanban.model.Epic;
 import ru.terralink.kanban.model.Subtask;
 import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
+import ru.terralink.kanban.util.TaskError;
 import ru.terralink.kanban.util.TaskUtils;
 
 import java.io.File;
@@ -49,35 +50,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public boolean updateTaskByIdAndType(Task task, int id, TaskType type) {
-        boolean result = super.updateTaskByIdAndType(task, id, type);
-        if (result) {
+    public int updateTaskByIdAndType(Task task, int id, TaskType type) {
+        int result = super.updateTaskByIdAndType(task, id, type);
+        if (result >= 0) {
             save();
         }
         return result;
     }
 
     @Override
-    public boolean updateTaskById(Task task, int id) {
+    public int updateTaskById(Task task, int id) {
         return updateTaskByIdAndType(task, id, task.getType());
     }
 
 
     @Override
-    public boolean deleteTaskByIdAndType(int id, TaskType type) {
-        boolean result = super.deleteTaskByIdAndType(id, type);
-        if (result) {
+    public int deleteTaskByIdAndType(int id, TaskType type) {
+        int result = super.deleteTaskByIdAndType(id, type);
+        if (result >= 0) {
             save();
         }
         return result;
     }
 
     @Override
-    public boolean deleteTaskById(int id) {
+    public int deleteTaskById(int id) {
         return Arrays.stream(TaskType.values())
-                .filter(type -> deleteTaskByIdAndType(id, type))
-                .findFirst()
-                .isPresent();
+                .filter(type -> deleteTaskByIdAndType(id, type) >= 0)
+                .findAny()
+                .isPresent() ? 0 : TaskUtils.ERROR_CODES.get(TaskError.UNKNOWN);
     }
 
     public void addParsedTask(Task task) {

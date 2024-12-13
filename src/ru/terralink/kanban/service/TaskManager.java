@@ -5,7 +5,6 @@ import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
 
 import java.util.List;
-import java.util.List;
 
 public interface TaskManager {
 
@@ -21,13 +20,13 @@ public interface TaskManager {
 
     int createTask(Task task);
 
-    boolean updateTaskByIdAndType(Task task, int id, TaskType type);
+    int updateTaskByIdAndType(Task task, int id, TaskType type);
 
-    boolean updateTaskById(Task task, int id);
+    int updateTaskById(Task task, int id);
 
-    boolean deleteTaskByIdAndType(int id, TaskType type);
+    int deleteTaskByIdAndType(int id, TaskType type);
 
-    boolean deleteTaskById(int id);
+    int deleteTaskById(int id);
 
     List<Subtask> getSubtasksByEpic(int id);
 

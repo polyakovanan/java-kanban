@@ -4,6 +4,8 @@ import ru.terralink.kanban.model.Epic;
 import ru.terralink.kanban.model.Subtask;
 import ru.terralink.kanban.model.Task;
 import ru.terralink.kanban.model.TaskType;
+import ru.terralink.kanban.util.TaskError;
+import ru.terralink.kanban.util.TaskUtils;
 
 import java.util.*;
 import java.util.List;
@@ -106,10 +108,10 @@ public class InMemoryTaskManager implements TaskManager {
             case TASK -> {
                 task.setId(++idCounter);
                 Task clone = (Task) task.clone();
-                tasks.put(task.getId(), clone);
                 if (!validateTaskDeadlines(clone)) {
-                    return -1;
+                    return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                 }
+                tasks.put(clone.getId(), clone);
                 if (clone.getStartTime() != null) {
                     prioritizedTasks.add(clone);
                 }
@@ -119,18 +121,17 @@ public class InMemoryTaskManager implements TaskManager {
                 //для подзадачи находим ее эпик и добавляем в него ссылку на нее
                 //(подразумеваем, что нельзя создать одним запросом и подзадачу, и ее эпик)
                 Subtask subtask = (Subtask) task;
+                subtask.setId(++idCounter);
                 Epic targetEpic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                 if (targetEpic == null) {
-                    return -1;
+                    return TaskUtils.ERROR_CODES.get(TaskError.ABSENT_EPIC);
                 }
 
-                subtask.setId(++idCounter);
                 Subtask clone = (Subtask) subtask.clone();
-                tasks.put(subtask.getId(), clone);
                 if (!validateTaskDeadlines(clone)) {
-                    return -1;
+                    return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                 }
-
+                tasks.put(clone.getId(), clone);
                 if (clone.getStartTime() != null) {
                     prioritizedTasks.add(clone);
                 }
@@ -139,7 +140,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
 
-        return -1;
+        return TaskUtils.ERROR_CODES.get(TaskError.UNKNOWN);
     }
 
     /*Если фронт по какой-то причине не может отдать тип задачи
@@ -155,7 +156,7 @@ public class InMemoryTaskManager implements TaskManager {
     * с таким id нет*/
 
     @Override
-    public boolean updateTaskByIdAndType(Task task, int id, TaskType type) {
+    public int updateTaskByIdAndType(Task task, int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
@@ -163,20 +164,21 @@ public class InMemoryTaskManager implements TaskManager {
                     final Epic originalEpic = (Epic) tasks.get(id);
                     originalEpic.setName(task.getName());
                     originalEpic.setDescription(task.getDescription());
-                    return true;
+                    return 0;
                 }
             }
             case TASK -> {
                 if (tasks.containsKey(id)) {
                     Task clone = (Task) task.clone();
+                    clone.setId(id);
                     tasks.put(id, clone);
                     if (!validateTaskDeadlines(clone)) {
-                        return false;
+                        return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                     }
                     if (clone.getStartTime() != null) {
                         prioritizedTasks.add(clone);
                     }
-                    return true;
+                    return 0;
                 }
             }
             case SUBTASK -> {
@@ -186,6 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
                     //всегда передобавляем новую подзадачу, чтобы стриггерить пересчет статуса эпика
                     Subtask originalSubtask = (Subtask) tasks.get(id);
                     Subtask clone = (Subtask) task.clone();
+                    clone.setId(id);
                     Epic newEpic = (Epic)taskStorage.get(TaskType.EPIC).get(clone.getEpicId());
                     if (originalSubtask.getEpicId() != clone.getEpicId()) {
                         Epic originalEpic = (Epic)taskStorage.get(TaskType.EPIC).get(originalSubtask.getEpicId());
@@ -194,23 +197,23 @@ public class InMemoryTaskManager implements TaskManager {
                     newEpic.addSubtask(clone);
                     tasks.put(id, clone);
                     if (!validateTaskDeadlines(clone)) {
-                        return false;
+                        return TaskUtils.ERROR_CODES.get(TaskError.INTERSECT);
                     }
                     if (clone.getStartTime() != null) {
                         prioritizedTasks.add(clone);
                     }
-                    return true;
+                    return 0;
                 }
             }
         }
 
-        return false;
+        return TaskUtils.ERROR_CODES.get(TaskError.UNKNOWN);
     }
 
     /*Тут тоже можем сами определить тип обновляемой задачи*/
 
     @Override
-    public boolean updateTaskById(Task task, int id) {
+    public int updateTaskById(Task task, int id) {
         return updateTaskByIdAndType(task, id, task.getType());
     }
 
@@ -218,7 +221,7 @@ public class InMemoryTaskManager implements TaskManager {
     * Хоть этот процесс никак не вредит технической составляющей процесса*/
 
     @Override
-    public boolean deleteTaskByIdAndType(int id, TaskType type) {
+    public int deleteTaskByIdAndType(int id, TaskType type) {
         Map<Integer, Task> tasks = taskStorage.get(type);
         switch (type) {
             case EPIC -> {
@@ -233,16 +236,17 @@ public class InMemoryTaskManager implements TaskManager {
                             .forEach(subId -> {
                                 prioritizedTasks.remove(subtasks.remove(subId));
                                 historyManager.remove(subId);
+
                             });
 
-                    return true;
+                    return 0;
                 }
             }
             case TASK -> {
                 if (tasks.containsKey(id)) {
                     prioritizedTasks.remove(tasks.remove(id));
                     historyManager.remove(id);
-                    return true;
+                    return 0;
                 }
             }
             case SUBTASK -> {
@@ -253,21 +257,21 @@ public class InMemoryTaskManager implements TaskManager {
                     Epic epic = (Epic)taskStorage.get(TaskType.EPIC).get(subtask.getEpicId());
                     epic.removeSubtask(id);
                     historyManager.remove(id);
-                    return true;
+                    return 0;
                 }
             }
         }
-        return false;
+        return -1;
     }
 
     /*Если не отдали тип задачи - перебираем коллекции по существующим типам*/
 
     @Override
-    public boolean deleteTaskById(int id) {
+    public int deleteTaskById(int id) {
         return Arrays.stream(TaskType.values())
-                .filter(type -> deleteTaskByIdAndType(id, type))
+                .filter(type -> deleteTaskByIdAndType(id, type) >= 0)
                 .findAny()
-                .isPresent();
+                .isPresent() ? 0 : TaskUtils.ERROR_CODES.get(TaskError.UNKNOWN);
     }
 
     /*Если есть такой эпик - отдаем его список подзадач*/
@@ -299,6 +303,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         return !prioritizedTasks.stream()
+                .filter(otherTask -> otherTask.getId() != task.getId())
                 .anyMatch(prioritizedTask -> prioritizedTask.checkTimeIntersections(task));
     }
 }

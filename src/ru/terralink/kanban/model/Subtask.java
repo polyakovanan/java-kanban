@@ -30,7 +30,7 @@ public class Subtask extends Task {
     @Override
     public Object clone() {
         Subtask subtask = new Subtask(this.id, this.name, this.description, this.epicId);
-        subtask.setStatus(this.getStatus());
+        subtask.setStatus(this.status == null ? TaskStatus.NEW : this.status);
         subtask.setStartTime(this.getStartTime());
         subtask.setDuration(this.getDuration());
         return subtask;

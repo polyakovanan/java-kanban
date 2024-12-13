@@ -14,6 +14,9 @@ public class TaskUtils {
     public static final String TEXT_FILE_HEADER = "id,type,name,status,description,epic,startTime,duration,endTime";
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     public static final int SECONDS_IN_MINUTE = 60;
+    public static final Map<TaskError, Integer> ERROR_CODES = Map.of(TaskError.UNKNOWN, -1,
+                                                              TaskError.INTERSECT, -2,
+                                                              TaskError.ABSENT_EPIC, -3);
 
     private TaskUtils() {
 
@@ -24,7 +27,7 @@ public class TaskUtils {
                 task.getDescription(), task.getType() == SUBTASK ? ((Subtask)task).getEpicId() : "",
                 task.getStartTime() != null ? task.getStartTime().format(DATE_TIME_FORMATTER) : "",
                 task.getDuration() != null ? task.getDuration().getSeconds() / SECONDS_IN_MINUTE : "",
-                task.getType() == EPIC && ((Epic)task).getEndTime() != null  ? ((Epic)task).getEndTime().format(DATE_TIME_FORMATTER) : "");
+                task.getType() == EPIC && (task).getEndTime() != null  ? (task).getEndTime().format(DATE_TIME_FORMATTER) : "");
     }
 
     public static Task fromString(String value) throws IllegalArgumentException {
